@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Karaoke</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2b0044 0%, #44002b 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Disco ball effect */
+        .disco-ball {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #fff, #888);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
+            animation: spin 5s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: translateX(-50%) rotate(360deg);
+            }
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ff00ff;
+            text-shadow: 0 0 20px #ff00ff;
+        }
+
+        .song-info {
+            margin-bottom: 30px;
+            color: #00ffff;
+            font-size: 1.2rem;
+        }
+
+        .lyrics-container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #ff00ff;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-line {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-family: 'Roboto Mono', monospace;
+            white-space: pre;
+        }
+
+        .highlight {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .pending {
+            color: #666;
+        }
+
+        .next-line {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        #input-area {
+            font-size: 1.5rem;
+            padding: 15px;
+            width: 80%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            font-family: 'Roboto Mono', monospace;
+            outline: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            margin-top: 20px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            width: 0%;
+            transition: width 0.2s linear;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #ff00ff;
+            color: #ff00ff;
+            padding: 10px 30px;
+            font-size: 1rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #ff00ff;
+            color: white;
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatUp 2s linear forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="disco-ball"></div>
+    <div class="container">
+        <h1>🎤 MODO KARAOKE</h1>
+        <div class="song-info">Canción: "Velocity Anthem" - BPM: 120</div>
+
+        <div class="score-board">
+            <div>Puntuación: <span id="score">0</span></div>
+            <div>Combo: <span id="combo">0</span>x</div>
+        </div>
+
+        <div class="lyrics-container">
+            <div id="current-line" class="current-line">
+                <span class="pending">Presiona ENTER para comenzar</span>
+            </div>
+            <div id="next-line" class="next-line">...</div>
+        </div>
+
+        <input type="text" id="input-area" autocomplete="off" disabled placeholder="Escribe la letra...">
+
+        <div class="progress-bar">
+            <div id="progress" class="progress-fill"></div>
+        </div>
+
+        <button class="btn" onclick="location.href='game-modes.html'">🏠 VOLVER</button>
+    </div>
+
+    <script>
+        // Simulated song data
+        const songLyrics = [
+            { text: "En el mundo digital", duration: 3000 },
+            { text: "donde todo es velocidad", duration: 3000 },
+            { text: "mis dedos vuelan", duration: 2500 },
+            { text: "sin mirar atrás", duration: 2500 },
+            { text: "código y luces", duration: 3000 },
+            { text: "neon en la ciudad", duration: 3000 },
+            { text: "escribo mi destino", duration: 2500 },
+            { text: "con gran habilidad", duration: 2500 },
+            { text: "VELOCITY es el juego", duration: 3000 },
+            { text: "que me hace vibrar", duration: 3000 }
+        ];
+
+        let currentLineIndex = 0;
+        let isPlaying = false;
+        let score = 0;
+        let combo = 0;
+        let charIndex = 0;
+        let lineStartTime = 0;
+        let lineDuration = 0;
+        let timerInterval;
+
+        const currentLineEl = document.getElementById('current-line');
+        const nextLineEl = document.getElementById('next-line');
+        const inputArea = document.getElementById('input-area');
+        const scoreEl = document.getElementById('score');
+        const comboEl = document.getElementById('combo');
+        const progressEl = document.getElementById('progress');
+
+        function startGame() {
+            isPlaying = true;
+            currentLineIndex = 0;
+            score = 0;
+            combo = 0;
+            inputArea.disabled = false;
+            inputArea.value = '';
+            inputArea.focus();
+            loadLine(0);
+        }
+
+        function loadLine(index) {
+            if (index >= songLyrics.length) {
+                endGame();
+                return;
+            }
+
+            currentLineIndex = index;
+            charIndex = 0;
+            inputArea.value = '';
+
+            const lineData = songLyrics[index];
+            const text = lineData.text;
+            lineDuration = lineData.duration;
+            lineStartTime = Date.now();
+
+            // Render text with spans for highlighting
+            currentLineEl.innerHTML = text.split('').map(char => `<span class="pending">${char}</span>`).join('');
+
+            // Show next line
+            if (index + 1 < songLyrics.length) {
+                nextLineEl.textContent = songLyrics[index + 1].text;
+            } else {
+                nextLineEl.textContent = "--- FIN ---";
+            }
+
+            // Start timer for this line
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - lineStartTime;
+                const progress = Math.min((elapsed / lineDuration) * 100, 100);
+                progressEl.style.width = progress + '%';
+
+                if (elapsed > lineDuration) {
+                    // Time's up for this line
+                    handleLineMiss();
+                }
+            }, 50);
+        }
+
+        function handleLineMiss() {
+            combo = 0;
+            comboEl.textContent = combo;
+            currentLineEl.style.color = 'red';
+            setTimeout(() => {
+                currentLineEl.style.color = '';
+                loadLine(currentLineIndex + 1);
+            }, 200);
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            currentLineEl.innerHTML = "¡CANCIÓN COMPLETADA!";
+            nextLineEl.textContent = `Puntuación Final: ${score}`;
+            inputArea.disabled = true;
+            progressEl.style.width = '100%';
+        }
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 10 + 5;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 2000);
+        }
+
+        inputArea.addEventListener('input', (e) => {
+            if (!isPlaying) return;
+
+            const inputVal = e.target.value;
+            const targetText = songLyrics[currentLineIndex].text;
+
+            // Validate current character
+            if (inputVal === targetText.substring(0, inputVal.length)) {
+                // Correct so far
+                const spans = currentLineEl.querySelectorAll('span');
+                for (let i = 0; i < spans.length; i++) {
+                    if (i < inputVal.length) {
+                        spans[i].className = 'highlight';
+                    } else {
+                        spans[i].className = 'pending';
+                    }
+                }
+
+                // Particle effect
+                const rect = inputArea.getBoundingClientRect();
+                createParticle(rect.left + Math.random() * rect.width, rect.top);
+
+                // Check if line complete
+                if (inputVal === targetText) {
+                    score += 100 + (combo * 10);
+                    combo++;
+                    scoreEl.textContent = score;
+                    comboEl.textContent = combo;
+
+                    // Bonus for speed (time remaining)
+                    const elapsed = Date.now() - lineStartTime;
+                    if (elapsed < lineDuration * 0.5) {
+                        score += 50; // Speed bonus
+                        createParticle(window.innerWidth / 2, window.innerHeight / 2);
+                    }
+
+                    loadLine(currentLineIndex + 1);
+                }
+            } else {
+                // Wrong character
+                combo = 0;
+                comboEl.textContent = combo;
+                inputArea.value = inputVal.substring(0, inputVal.length - 1); // Prevent wrong input
+                document.body.style.backgroundColor = '#550000';
+                setTimeout(() => document.body.style.backgroundColor = '', 100);
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !isPlaying) {
+                startGame();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Idiomas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #003366 0%, #001133 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            color: #4da6ff;
+            text-shadow: 0 0 20px rgba(77, 166, 255, 0.5);
+        }
+
+        .flag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .flag-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .flag-card:hover,
+        .flag-card.active {
+            background: rgba(77, 166, 255, 0.2);
+            border-color: #4da6ff;
+            transform: translateY(-5px);
+        }
+
+        .flag-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .game-area {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #4da6ff;
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+
+        #target-word {
+            font-size: 4rem;
+            margin: 30px 0;
+            color: white;
+        }
+
+        #translation {
+            font-size: 1.5rem;
+            color: #aaa;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        input {
+            font-size: 2rem;
+            padding: 15px;
+            width: 100%;
+            max-width: 500px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #4da6ff;
+            color: white;
+            text-align: center;
+            font-family: 'Orbitron', sans-serif;
+            outline: none;
+        }
+
+        .btn {
+            background: transparent;
+            border: 2px solid #4da6ff;
+            color: #4da6ff;
+            padding: 10px 30px;
+            font-size: 1rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin-top: 30px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #4da6ff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🌍 MODO IDIOMAS</h1>
+
+        <div class="flag-grid" id="lang-select">
+            <div class="flag-card" onclick="selectLang('en')">
+                <span class="flag-icon">🇺🇸</span>
+                <span>Inglés</span>
+            </div>
+            <div class="flag-card" onclick="selectLang('fr')">
+                <span class="flag-icon">🇫🇷</span>
+                <span>Francés</span>
+            </div>
+            <div class="flag-card" onclick="selectLang('de')">
+                <span class="flag-icon">🇩🇪</span>
+                <span>Alemán</span>
+            </div>
+            <div class="flag-card" onclick="selectLang('it')">
+                <span class="flag-icon">🇮🇹</span>
+                <span>Italiano</span>
+            </div>
+            <div class="flag-card" onclick="selectLang('pt')">
+                <span class="flag-icon">🇧🇷</span>
+                <span>Portugués</span>
+            </div>
+        </div>
+
+        <div id="game-area" class="game-area">
+            <div id="target-word">Selecciona un idioma</div>
+            <div id="translation"></div>
+            <input type="text" id="input" autocomplete="off" placeholder="Escribe aquí...">
+
+            <div style="margin-top: 20px; color: #aaa;">
+                Puntuación: <span id="score" style="color: #4da6ff;">0</span>
+            </div>
+        </div>
+
+        <button class="btn" onclick="location.href='game-modes.html'">🏠 VOLVER</button>
+    </div>
+
+    <script>
+        const dictionaries = {
+            en: [
+                { word: "hello", trans: "hola" }, { word: "world", trans: "mundo" },
+                { word: "computer", trans: "computadora" }, { word: "keyboard", trans: "teclado" },
+                { word: "speed", trans: "velocidad" }, { word: "game", trans: "juego" },
+                { word: "winner", trans: "ganador" }, { word: "coding", trans: "programación" }
+            ],
+            fr: [
+                { word: "bonjour", trans: "hola" }, { word: "monde", trans: "mundo" },
+                { word: "ordinateur", trans: "computadora" }, { word: "clavier", trans: "teclado" },
+                { word: "vitesse", trans: "velocidad" }, { word: "jeu", trans: "juego" },
+                { word: "gagnant", trans: "ganador" }, { word: "programmation", trans: "programación" }
+            ],
+            de: [
+                { word: "hallo", trans: "hola" }, { word: "welt", trans: "mundo" },
+                { word: "computer", trans: "computadora" }, { word: "tastatur", trans: "teclado" },
+                { word: "geschwindigkeit", trans: "velocidad" }, { word: "spiel", trans: "juego" },
+                { word: "gewinner", trans: "ganador" }, { word: "programmierung", trans: "programación" }
+            ],
+            it: [
+                { word: "ciao", trans: "hola" }, { word: "mondo", trans: "mundo" },
+                { word: "computer", trans: "computadora" }, { word: "tastiera", trans: "teclado" },
+                { word: "velocita", trans: "velocidad" }, { word: "gioco", trans: "juego" },
+                { word: "vincitore", trans: "ganador" }, { word: "programmazione", trans: "programación" }
+            ],
+            pt: [
+                { word: "ola", trans: "hola" }, { word: "mundo", trans: "mundo" },
+                { word: "computador", trans: "computadora" }, { word: "teclado", trans: "teclado" },
+                { word: "velocidade", trans: "velocidad" }, { word: "jogo", trans: "juego" },
+                { word: "vencedor", trans: "ganador" }, { word: "programacao", trans: "programación" }
+            ]
+        };
+
+        let currentLang = '';
+        let currentWordObj = null;
+        let score = 0;
+
+        function selectLang(lang) {
+            currentLang = lang;
+
+            // Visual feedback
+            document.querySelectorAll('.flag-card').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.getElementById('game-area').classList.add('active');
+            score = 0;
+            document.getElementById('score').textContent = score;
+
+            nextWord();
+            document.getElementById('input').focus();
+        }
+
+        function nextWord() {
+            const dict = dictionaries[currentLang];
+            currentWordObj = dict[Math.floor(Math.random() * dict.length)];
+
+            document.getElementById('target-word').textContent = currentWordObj.word;
+            document.getElementById('translation').textContent = `(${currentWordObj.trans})`;
+            document.getElementById('input').value = '';
+        }
+
+        document.getElementById('input').addEventListener('input', (e) => {
+            if (!currentWordObj) return;
+
+            const input = e.target.value.trim().toLowerCase();
+
+            if (input === currentWordObj.word.toLowerCase()) {
+                score += 10;
+                document.getElementById('score').textContent = score;
+
+                // Visual success
+                document.getElementById('input').style.borderColor = '#00ff00';
+                setTimeout(() => document.getElementById('input').style.borderColor = '#4da6ff', 200);
+
+                nextWord();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Historia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            height: 600px;
+            background: url('https://img.freepik.com/free-vector/futuristic-technological-background_23-2148452268.jpg');
+            /* Placeholder BG */
+            background-size: cover;
+            border-radius: 20px;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .level-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #333;
+            border: 3px solid #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .level-node.unlocked {
+            background: #004400;
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .level-node.locked {
+            background: #222;
+            border-color: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .level-node.boss {
+            width: 80px;
+            height: 80px;
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .level-node:hover.unlocked {
+            transform: scale(1.1);
+            background: #006600;
+        }
+
+        /* Connecting lines would be SVG in a real implementation, simplified here */
+
+        .level-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px solid #ffd700;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .modal-desc {
+            margin-bottom: 30px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: #ffd700;
+            color: black;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            margin-top: 40px;
+            background: transparent;
+            border: 2px solid #ffd700;
+            color: #ffd700;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🗺️ MODO HISTORIA</h1>
+
+    <div class="map-container">
+        <div class="map-overlay"></div>
+
+        <!-- Nodes positioned absolutely -->
+        <div class="level-node unlocked" style="bottom: 10%; left: 10%;" onclick="openLevel(1)">1</div>
+        <div class="level-node locked" style="bottom: 25%; left: 20%;" onclick="openLevel(2)">2</div>
+        <div class="level-node locked" style="bottom: 40%; left: 15%;" onclick="openLevel(3)">3</div>
+        <div class="level-node locked" style="bottom: 55%; left: 30%;" onclick="openLevel(4)">4</div>
+        <div class="level-node locked boss" style="bottom: 70%; left: 50%;" onclick="openLevel(5)">BOSS</div>
+    </div>
+
+    <button class="btn back-btn" onclick="location.href='game-modes.html'">🏠 VOLVER AL MENÚ</button>
+
+    <div class="level-modal" id="level-modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modal-title">Nivel 1</h2>
+            <p class="modal-desc" id="modal-desc">
+                Bienvenido al Ciberespacio. Tu primera misión es infiltrarte en el servidor básico.
+                <br><br>
+                <strong>Objetivo:</strong> Escribe 20 palabras en menos de 60 segundos.
+            </p>
+            <button class="btn" onclick="startLevel()">INICIAR MISIÓN</button>
+            <button class="btn" style="background: transparent; border: 1px solid #666; color: #666; margin-left: 10px;"
+                onclick="closeModal()">CANCELAR</button>
+        </div>
+    </div>
+
+    <script>
+        // Simple progression system
+        let currentLevel = 1;
+
+        // Load progress from local storage
+        if (localStorage.getItem('storyProgress')) {
+            currentLevel = parseInt(localStorage.getItem('storyProgress'));
+        }
+
+        // Update UI based on progress
+        const nodes = document.querySelectorAll('.level-node');
+        nodes.forEach((node, index) => {
+            const levelNum = index + 1;
+            if (levelNum < currentLevel) {
+                node.className = 'level-node unlocked';
+                node.innerHTML = '✓';
+            } else if (levelNum === currentLevel) {
+                node.className = 'level-node unlocked';
+            } else {
+                node.className = 'level-node locked';
+            }
+        });
+
+        function openLevel(level) {
+            if (level > currentLevel) return;
+
+            const modal = document.getElementById('level-modal');
+            const title = document.getElementById('modal-title');
+            const desc = document.getElementById('modal-desc');
+
+            title.textContent = level === 5 ? "JEFE FINAL" : `Nivel ${level}`;
+
+            // Custom descriptions
+            if (level === 1) desc.innerHTML = "Infiltración Básica.<br>Escribe 20 palabras simples.";
+            if (level === 5) desc.innerHTML = "EL CORTAFUEGOS.<br>Derrota al guardián escribiendo código real.";
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('level-modal').style.display = 'none';
+        }
+
+        function startLevel() {
+            // In a real implementation, this would redirect to a game page with specific params
+            alert("¡Iniciando nivel! (Simulación: Ganaste)");
+
+            // Simulate win
+            if (confirm("¿Completaste el nivel?")) {
+                if (currentLevel < 5) {
+                    currentLevel++;
+                    localStorage.setItem('storyProgress', currentLevel);
+                    location.reload();
+                } else {
+                    alert("¡JUEGO COMPLETADO!");
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -125,6 +125,16 @@
         <h1 class="logo">VELOCITY</h1>
         <p class="subtitle">Elige tu modo de juego</p>
 
+        <div class="user-bar" onclick="location.href='profile.html'"
+            style="cursor: pointer; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 50px; display: inline-flex; align-items: center; gap: 15px; margin-bottom: 30px; border: 1px solid #00ff88;">
+            <span style="font-size: 1.5rem;" id="menu-avatar">👤</span>
+            <div style="text-align: left;">
+                <div style="font-weight: bold; color: #00ff88;" id="menu-username">Jugador 1</div>
+                <div style="font-size: 0.8rem; color: #aaa;">Nivel <span id="user-level">1</span> • <span
+                        id="user-coins">0</span> 💰</div>
+            </div>
+        </div>
+
         <div class="mode-grid">
             <a href="classic-mode.html" class="mode-card">
                 <div class="mode-icon">⏱️</div>
@@ -141,10 +151,19 @@
             </a>
         </div>
 
-        <button class="stats-btn" onclick="location.href='game-modes.html'">🎮 VER TODOS LOS MODOS</button>
-        <button class="stats-btn" onclick="location.href='coming-soon.html'">🚀 PRÓXIMAMENTE</button>
-        <button class="stats-btn" onclick="alert('Estadísticas próximamente')">📊 ESTADÍSTICAS GLOBALES</button>
+        <button class="stats-btn" onclick="location.href='game-modes.html'" style="margin-bottom: 15px;">🎮 VER TODOS
+            LOS MODOS</button>
+        <button class="stats-btn" onclick="location.href='coming-soon.html'" style="margin-bottom: 15px;">🚀
+            PRÓXIMAMENTE</button>
+        <button class="stats-btn" onclick="location.href='profile.html'">📊 MI PERFIL</button>
     </div>
+
+    <script src="progression.js"></script>
+    <script>
+        // Update menu with user data
+        document.getElementById('menu-avatar').textContent = localStorage.getItem('velocity_avatar') || '👤';
+        document.getElementById('menu-username').textContent = localStorage.getItem('velocity_username') || 'Jugador 1';
+    </script>
 </body>
 
 </html>
