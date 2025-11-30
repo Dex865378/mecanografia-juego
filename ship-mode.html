@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <!DOCTYPE html>
+    <html lang="es">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VELOCITY - Neon Ship Battle</title>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background-color: #050510;
+                color: white;
+                overflow: hidden;
+                font-family: 'Orbitron', sans-serif;
+                user-select: none;
+            }
+
+            canvas {
+                display: block;
+            }
+
+            #ui-layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 20px;
+            }
+
+            .hud-top {
+                display: flex;
+                justify-content: space-between;
+                font-size: 1.5rem;
+                text-shadow: 0 0 10px #00ff88;
+            }
+
+            .score-box {
+                color: #00ff88;
+            }
+
+            .lives-box {
+                color: #ff006e;
+            }
+
+            #start-screen,
+            #game-over-screen {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(5, 5, 16, 0.9);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+                pointer-events: auto;
+            }
+
+            h1 {
+                font-size: 4rem;
+                margin-bottom: 20px;
+                background: linear-gradient(45deg, #b026ff, #00ff88);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 0 30px rgba(176, 38, 255, 0.5);
+            }
+
+            button {
+                background: transparent;
+                border: 2px solid #b026ff;
+                color: #b026ff;
+                padding: 15px 40px;
+                font-size: 1.5rem;
+                font-family: 'Orbitron', sans-serif;
+                cursor: pointer;
+                margin: 10px;
+                transition: all 0.3s;
+                border-radius: 5px;
+                text-transform: uppercase;
+                box-shadow: 0 0 15px rgba(176, 38, 255, 0.2);
+            }
+
+            button:hover {
+                background: #b026ff;
+                color: #fff;
+                box-shadow: 0 0 30px rgba(176, 38, 255, 0.8);
+                transform: scale(1.05);
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            #custom-text-area {
+                width: 60%;
+                height: 100px;
+                background: rgba(0, 0, 0, 0.5);
+                border: 1px solid #00ff88;
+                color: #00ff88;
+                padding: 10px;
+                margin-bottom: 20px;
+                font-family: monospace;
+            }
+
+            /* VIRTUAL KEYBOARD STYLES */
+            #virtual-keyboard {
+                display: none;
+                /* Hidden by default */
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 35vh;
+                background: rgba(5, 5, 16, 0.95);
+                border-top: 2px solid #b026ff;
+                padding: 5px;
+                z-index: 1000005;
+                user-select: none;
+                touch-action: manipulation;
+            }
+
+            .kb-row {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+                height: 32%;
+                margin-bottom: 1%;
+            }
+
+            .kb-key {
+                background: rgba(176, 38, 255, 0.1);
+                border: 1px solid #b026ff;
+                color: #00ff88;
+                border-radius: 4px;
+                margin: 0 2px;
+                flex-grow: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: 'Orbitron', sans-serif;
+                font-size: 1.2rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.1s;
+                text-shadow: 0 0 5px #00ff88;
+            }
+
+            .kb-key:active,
+            .kb-key.active {
+                background: #00ff88;
+                color: #050510;
+                transform: scale(0.95);
+                box-shadow: 0 0 15px #00ff88;
+            }
+
+            /* Mobile adjustments */
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 2rem;
+                }
+
+                #ui-layer {
+                    padding: 10px;
+                }
+
+                .hud-top {
+                    font-size: 1rem;
+                }
+
+                #custom-text-area {
+                    width: 90%;
+                }
+            }
+        </style>
+    </head>
+
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-layer">
+        <div class="hud-top">
+            <div class="score-box">SCORE: <span id="score">0</span></div>
+            <div class="lives-box">SHIELD: <span id="lives">100%</span></div>
+        </div>
+    </div>
+
+    <div id="start-screen">
+        <h1>NEON BATTLE</h1>
+        <p style="margin-bottom: 30px; color: #aaa;">Escribe para destruir.</p>
+        <button onclick="startGame()">INICIAR MISIÓN</button>
+        <button onclick="toggleCustomText()">TEXTO PERSONALIZADO</button>
+        <button onclick="window.location.href='index.html'">VOLVER AL MENÚ</button>
+        <textarea id="custom-text-area" class="hidden" placeholder="Pega tu texto aquí..."></textarea>
+    </div>
+
+    <div id="game-over-screen" class="hidden">
+        <h1>SISTEMA CRÍTICO</h1>
+        <p style="font-size: 2rem; margin-bottom: 20px;">Puntuación: <span id="final-score">0</span></p>
+        <button onclick="location.reload()">REINICIAR</button>
+        <button onclick="window.location.href='index.html'">SALIR</button>
+    </div>
+
+    <!-- VIRTUAL KEYBOARD -->
+    <div id="virtual-keyboard">
+        <div class="kb-row" id="row1"></div>
+        <div class="kb-row" id="row2"></div>
+        <div class="kb-row" id="row3"></div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        // Ajustar canvas
+        function resize() {
+            canvas.width = window.innerWidth;
+            // Si es móvil y estamos jugando, restar espacio del teclado
+            if (isMobile && state.playing) {
+                canvas.height = window.innerHeight * 0.65; // 65% para juego, 35% teclado
+            } else {
+                canvas.height = window.innerHeight;
+            }
+        }
+        window.addEventListener('resize', resize);
+
+        // --- VIRTUAL KEYBOARD SETUP ---
+        const keys = [
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+            ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+        ];
+
+        function initKeyboard() {
+            if (!isMobile) return;
+
+            const kb = document.getElementById('virtual-keyboard');
+            kb.style.display = 'block'; // Mostrar en móvil
+
+            keys.forEach((row, i) => {
+                const rowEl = document.getElementById(`row${i + 1}`);
+                row.forEach(char => {
+                    const keyEl = document.createElement('div');
+                    keyEl.className = 'kb-key';
+                    keyEl.innerText = char;
+                    keyEl.dataset.key = char;
+
+                    // Touch events
+                    keyEl.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        handleInput(char);
+                        keyEl.classList.add('active');
+                        if (navigator.vibrate) navigator.vibrate(10);
+                    });
+
+                    keyEl.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        keyEl.classList.remove('active');
+                    });
+
+                    rowEl.appendChild(keyEl);
+                });
+            });
+
+            resize(); // Reajustar canvas
+        }
+
+        // --- AUDIO SYSTEM (Sintetizador) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'shoot') {
+                // Laser pew pew
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'explosion') {
+                // Boom
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'lock') {
+                // Target locked
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'error') {
+                // Error buzz
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'levelup') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.linearRampToValueAtTime(880, now + 0.2);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        }
+
+        // --- ESTADO DEL JUEGO ---
+        let state = {
+            playing: false,
+            score: 0,
+            lives: 100,
+            wave: 1,
+            levelProgress: 0,
+            levelTarget: 10,
+            words: [],
+            particles: [],
+            lasers: [],
+            targetWord: null,
+            lastTime: 0,
+            spawnTimer: 0,
+            spawnInterval: 2000,
+            globalSpeedMultiplier: 1.0
+        };
+
+        const ship = {
+            x: 0, // Se actualizará en resize/draw
+            y: 0,
+            color: '#b026ff',
+            width: 40,
+            height: 50
+        };
+
+        const defaultWords = "velocidad nave espacio galaxia estrella planeta cohete laser batalla victoria destruir enemigo defensa ataque poder energia escudo mision objetivo triunfo sistema red codigo binario hacker futuro neon luz sonido rapido agil mente cerebro foco control total cibernetico android robot mecha plasma nucleo fusion atomo cuantico orbita gravedad vacio infinito horizonte evento singularidad materia oscura nebulosa pulsar quasar supernova hiperespacio salto portal dimension tiempo reloj ciclo bucle memoria ram procesador gpu cpu placa circuito silicio voltaje amperaje resistencia led diodo transistor logica algoritmo funcion variable constante matriz vector tensor calculo fisica quimica biologia adn arn celula virus bacteria mutacion evolucion genetica clon dron satelite estacion modulo capsula traje casco oxigeno hidrogeno helio carbono hierro metal acero titanio fibra carbono vidrio cristal diamante rubi zafiro esmeralda oro plata platino cobre bronce aluminio".split(" ");
+        let wordPool = [...defaultWords];
+
+        // --- LÓGICA ---
+
+        function startGame() {
+            const customText = document.getElementById('custom-text-area').value.trim();
+            if (customText) {
+                wordPool = customText.split(/\s+/).filter(w => w.length > 1);
+            }
+
+            document.getElementById('start-screen').classList.add('hidden');
+
+            // Inicializar teclado si es móvil
+            if (isMobile) {
+                initKeyboard();
+                resize(); // Forzar resize para ajustar canvas
+            }
+
+            state.playing = true;
+            state.score = 0;
+            state.lives = 100;
+            state.wave = 1;
+            state.levelProgress = 0;
+            state.levelTarget = 10;
+            state.spawnInterval = 2000;
+            state.globalSpeedMultiplier = 1.0;
+
+            state.words = [];
+            state.lasers = [];
+            state.particles = [];
+            state.targetWord = null;
+            state.lastTime = performance.now();
+
+            updateHUD();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function toggleCustomText() {
+            document.getElementById('custom-text-area').classList.toggle('hidden');
+        }
+
+        function spawnWord() {
+            const text = wordPool[Math.floor(Math.random() * wordPool.length)].toUpperCase();
+            const x = Math.random() * (canvas.width - 100) + 50; // Margen ajustado
+            const baseSpeed = 0.5 + (state.wave * 0.15);
+
+            state.words.push({
+                text: text,
+                x: x,
+                y: -50,
+                typedIndex: 0,
+                speed: baseSpeed,
+                id: Math.random()
+            });
+        }
+
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 15; i++) {
+                state.particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1.0,
+                    color: color
+                });
+            }
+        }
+
+        function update(dt) {
+            // Actualizar posición nave (siempre centrada abajo)
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 60;
+
+            state.spawnTimer += dt;
+            if (state.spawnTimer > state.spawnInterval) {
+                spawnWord();
+                state.spawnTimer = 0;
+            }
+
+            state.words.forEach(w => {
+                w.y += w.speed * state.globalSpeedMultiplier;
+                if (w.y > canvas.height) {
+                    state.lives -= 10;
+                    w.dead = true;
+                    playSound('error');
+                    if (state.targetWord === w) state.targetWord = null;
+                }
+            });
+            state.words = state.words.filter(w => !w.dead);
+
+            state.lasers.forEach(l => {
+                const dx = l.targetX - l.x;
+                const dy = l.targetY - l.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < 20) {
+                    l.dead = true;
+                } else {
+                    l.x += (dx / dist) * 25;
+                    l.y += (dy / dist) * 25;
+                }
+            });
+            state.lasers = state.lasers.filter(l => !l.dead);
+
+            state.particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.05;
+            });
+            state.particles = state.particles.filter(p => p.life > 0);
+
+            if (state.lives <= 0) {
+                state.playing = false;
+                document.getElementById('game-over-screen').classList.remove('hidden');
+                document.getElementById('final-score').innerText = state.score;
+                if (isMobile) document.getElementById('virtual-keyboard').style.display = 'none';
+            }
+
+            updateHUD();
+        }
+
+        function levelUp() {
+            state.wave++;
+            state.levelProgress = 0;
+            state.levelTarget += 10;
+            state.spawnInterval = Math.max(400, 2000 - (state.wave * 150));
+            playSound('levelup');
+
+            const hud = document.querySelector('.hud-top');
+            hud.style.color = '#00ff88';
+            hud.style.transform = 'scale(1.2)';
+            hud.style.transition = 'all 0.5s';
+            setTimeout(() => {
+                hud.style.color = 'white';
+                hud.style.transform = 'scale(1)';
+            }, 500);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(176, 38, 255, 0.1)';
+            ctx.lineWidth = 1;
+            const time = Date.now() / 1000;
+            const gridOffset = (time * 50) % 50;
+
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for (let i = gridOffset; i < canvas.height; i += 50) {
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+            }
+
+            drawShip(ship.x, ship.y);
+
+            ctx.font = 'bold 20px Orbitron'; // Fuente un poco más pequeña para móvil
+            state.words.forEach(w => {
+                if (state.targetWord === w) {
+                    ctx.beginPath();
+                    ctx.moveTo(ship.x, ship.y - 40);
+                    ctx.lineTo(w.x, w.y + 10);
+                    ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.strokeStyle = '#00ff88';
+                    ctx.beginPath();
+                    ctx.arc(w.x, w.y - 10, 30, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                const text = w.text;
+                const typed = text.substring(0, w.typedIndex);
+                const untyped = text.substring(w.typedIndex);
+
+                ctx.fillStyle = '#00ff88';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00ff88';
+                ctx.textAlign = 'right';
+                ctx.fillText(typed, w.x - (ctx.measureText(untyped).width / 2), w.y);
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ff006e';
+                ctx.shadowColor = '#ff006e';
+                ctx.fillText(untyped, w.x - (ctx.measureText(untyped).width / 2), w.y);
+
+                ctx.shadowBlur = 0;
+            });
+
+            state.lasers.forEach(l => {
+                ctx.fillStyle = '#00ff88';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00ff88';
+                ctx.beginPath();
+                ctx.arc(l.x, l.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(l.x, l.y);
+                ctx.lineTo(l.x - (l.x - ship.x) * 0.1, l.y - (l.y - ship.y) * 0.1);
+                ctx.stroke();
+            });
+
+            state.particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            });
+        }
+
+        function drawShip(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = '#b026ff';
+            ctx.fillStyle = '#b026ff';
+            ctx.beginPath();
+            ctx.moveTo(0, -40);
+            ctx.lineTo(-25, 20);
+            ctx.lineTo(0, 10);
+            ctx.lineTo(25, 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(-5, 5);
+            ctx.lineTo(5, 5);
+            ctx.fill();
+            ctx.shadowColor = '#00ff88';
+            ctx.fillStyle = '#00ff88';
+            ctx.beginPath();
+            ctx.moveTo(-10, 20);
+            ctx.lineTo(0, 40 + Math.random() * 10);
+            ctx.lineTo(10, 20);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function gameLoop(timestamp) {
+            if (!state.playing) return;
+            const dt = timestamp - state.lastTime;
+            state.lastTime = timestamp;
+            update(dt);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateHUD() {
+            document.getElementById('score').innerText = state.score;
+            document.getElementById('lives').innerText = Math.max(0, state.lives) + '%';
+            // Update level info in HUD (need to add element first)
+            let levelEl = document.getElementById('level-info');
+            if (!levelEl) {
+                levelEl = document.createElement('div');
+                levelEl.id = 'level-info';
+                levelEl.style.color = '#fff';
+                document.querySelector('.hud-top').appendChild(levelEl);
+            }
+            levelEl.innerText = `NIVEL ${state.wave} (${state.levelProgress}/${state.levelTarget})`;
+        }
+
+        // --- INPUT HANDLING (Unified) ---
+        function handleInput(key) {
+            if (!state.playing) return;
+            key = key.toUpperCase();
+
+            if (state.targetWord) {
+                const nextChar = state.targetWord.text[state.targetWord.typedIndex];
+                if (key === nextChar) {
+                    shootAt(state.targetWord, state.targetWord.typedIndex);
+                    state.targetWord.typedIndex++;
+                    if (state.targetWord.typedIndex >= state.targetWord.text.length) {
+                        destroyWord(state.targetWord);
+                        state.targetWord = null;
+                    }
+                } else {
+                    playSound('error');
+                    state.targetWord.typedIndex = 0;
+                }
+            } else {
+                const candidates = state.words.filter(w => w.text[0] === key && w.y < canvas.height - 100);
+                if (candidates.length > 0) {
+                    candidates.sort((a, b) => b.y - a.y);
+                    state.targetWord = candidates[0];
+                    playSound('lock');
+                    shootAt(state.targetWord, 0);
+                    state.targetWord.typedIndex++;
+                    if (state.targetWord.typedIndex >= state.targetWord.text.length) {
+                        destroyWord(state.targetWord);
+                        state.targetWord = null;
+                    }
+                } else {
+                    playSound('error');
+                }
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+                handleInput(e.key);
+            }
+        });
+
+        function shootAt(word, letterIndex) {
+            playSound('shoot');
+            const width = ctx.measureText(word.text).width;
+            const charWidth = width / word.text.length;
+            const targetX = word.x - (width / 2) + (charWidth * letterIndex) + (charWidth / 2);
+            state.lasers.push({
+                x: ship.x,
+                y: ship.y - 40,
+                targetX: targetX,
+                targetY: word.y,
+                dead: false
+            });
+        }
+
+        function destroyWord(word) {
+            playSound('explosion');
+            createExplosion(word.x, word.y, '#ff006e');
+            state.score += word.text.length * 100;
+            word.dead = true;
+
+            // Level Logic
+            state.levelProgress++;
+            if (state.levelProgress >= state.levelTarget) {
+                levelUp();
+            }
+        }
+
+        // Initial resize
+        resize();
+    </script>
+</body>
+
+</html>
