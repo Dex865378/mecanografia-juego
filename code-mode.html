@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Código</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Orbitron:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Fira Code', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #252526;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            color: #007acc;
+            font-size: 1.5rem;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+
+        .editor-container {
+            flex: 1;
+            display: flex;
+            position: relative;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .line-numbers {
+            text-align: right;
+            padding-right: 20px;
+            color: #858585;
+            user-select: none;
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .code-area {
+            flex: 1;
+            position: relative;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            white-space: pre;
+            overflow: hidden;
+        }
+
+        #target-code {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #6a9955;
+            /* Comentario/Fantasma */
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #user-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: #d4d4d4;
+            z-index: 2;
+            background: transparent;
+            border: none;
+            outline: none;
+            width: 100%;
+            height: 100%;
+            resize: none;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #007acc;
+            animation: blink 1s infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .correct {
+            color: #ce9178;
+        }
+
+        /* String color style */
+        .wrong {
+            background-color: rgba(255, 0, 0, 0.3);
+        }
+
+        .status-bar {
+            background-color: #007acc;
+            color: white;
+            padding: 5px 20px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: #252526;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #007acc;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal h2 {
+            color: #007acc;
+            margin-bottom: 20px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .btn {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-family: 'Fira Code', monospace;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #005a9e;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid #007acc;
+            color: #007acc;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 122, 204, 0.1);
+        }
+
+        /* Syntax Highlighting Simulation Classes */
+        .keyword {
+            color: #569cd6;
+        }
+
+        .function {
+            color: #dcdcaa;
+        }
+
+        .string {
+            color: #ce9178;
+        }
+
+        .number {
+            color: #b5cea8;
+        }
+
+        .comment {
+            color: #6a9955;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="title">VELOCITY_CODE</div>
+        <div class="stats-bar">
+            <div class="stat">Líneas: <span class="stat-value" id="lines-count">0</span></div>
+            <div class="stat">Errores: <span class="stat-value" id="errors-count" style="color: #f48771">0</span></div>
+            <div class="stat">WPM: <span class="stat-value" id="wpm">0</span></div>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <div class="line-numbers" id="line-numbers">
+            1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10
+        </div>
+        <div class="code-area">
+            <div id="target-code"></div>
+            <textarea id="user-input" spellcheck="false" autocomplete="off"></textarea>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div>MODO: INSERCIÓN</div>
+        <div>UTF-8</div>
+        <div>JavaScript</div>
+    </div>
+
+    <div id="result-modal" class="modal">
+        <div class="modal-content">
+            <h2>COMPILACIÓN EXITOSA</h2>
+            <p>Has completado el snippet.</p>
+            <div style="margin: 20px 0; text-align: left;">
+                <p>Velocidad: <span id="final-wpm" style="color: #4ec9b0; float: right;">0 WPM</span></p>
+                <p>Precisión: <span id="final-accuracy" style="color: #4ec9b0; float: right;">0%</span></p>
+            </div>
+            <button class="btn" onclick="nextSnippet()">SIGUIENTE ARCHIVO</button>
+            <button class="btn btn-secondary" onclick="location.href='game-modes.html'">SALIR</button>
+        </div>
+    </div>
+
+    <script>
+        const snippets = [
+            `function binarySearch(arr, target) {
+    let left = 0;
+    let right = arr.length - 1;
+
+    while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        if (arr[mid] === target) {
+            return mid;
+        }
+        if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return -1;
+}`,
+            `const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
+
+app.listen(port, () => {
+    console.log(\`App listening on port \${port}\`);
+});`,
+            `class Rectangle {
+    constructor(height, width) {
+        this.height = height;
+        this.width = width;
+    }
+
+    get area() {
+        return this.calcArea();
+    }
+
+    calcArea() {
+        return this.height * this.width;
+    }
+}`,
+            `@media (max-width: 600px) {
+    .container {
+        flex-direction: column;
+        padding: 10px;
+    }
+    
+    .header {
+        font-size: 1.5rem;
+        color: #333;
+    }
+}`
+        ];
+
+        let currentSnippetIndex = 0;
+        let currentSnippet = '';
+        let startTime = null;
+        let errors = 0;
+        let isFinished = false;
+
+        const targetElement = document.getElementById('target-code');
+        const inputElement = document.getElementById('user-input');
+        const lineNumbersElement = document.getElementById('line-numbers');
+
+        function loadSnippet(index) {
+            currentSnippet = snippets[index];
+            targetElement.textContent = currentSnippet;
+            inputElement.value = '';
+            inputElement.focus();
+
+            // Update line numbers
+            const lines = currentSnippet.split('\n').length;
+            lineNumbersElement.innerHTML = Array(lines).fill(0).map((_, i) => i + 1).join('<br>');
+
+            startTime = null;
+            errors = 0;
+            isFinished = false;
+            updateStats();
+            document.getElementById('result-modal').style.display = 'none';
+        }
+
+        function updateStats() {
+            document.getElementById('errors-count').textContent = errors;
+
+            if (startTime) {
+                const timeElapsed = (Date.now() - startTime) / 60000; // minutes
+                const words = inputElement.value.length / 5;
+                const wpm = Math.round(words / timeElapsed) || 0;
+                document.getElementById('wpm').textContent = wpm;
+            }
+        }
+
+        inputElement.addEventListener('input', (e) => {
+            if (isFinished) return;
+            if (!startTime) startTime = Date.now();
+
+            const input = inputElement.value;
+
+            // Check for completion
+            if (input === currentSnippet) {
+                finishGame();
+                return;
+            }
+
+            // Simple error checking logic
+            // In a real IDE simulation, we would do character by character comparison visually
+            // Here we just prevent typing if it's completely wrong or track errors
+
+            const currentLength = input.length;
+            const targetChar = currentSnippet[currentLength - 1];
+            const inputChar = input[currentLength - 1];
+
+            if (input !== currentSnippet.substring(0, currentLength)) {
+                // Error detected
+                errors++;
+                // Visual feedback could be added here (e.g., flash red)
+                document.body.style.backgroundColor = '#3a1e1e';
+                setTimeout(() => document.body.style.backgroundColor = '#1e1e1e', 100);
+            }
+
+            updateStats();
+        });
+
+        // Prevent tab from changing focus
+        inputElement.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = inputElement.selectionStart;
+                const end = inputElement.selectionEnd;
+
+                // Insert 4 spaces
+                inputElement.value = inputElement.value.substring(0, start) +
+                    "    " + inputElement.value.substring(end);
+
+                inputElement.selectionStart = inputElement.selectionEnd = start + 4;
+
+                // Trigger input event manually to check correctness
+                inputElement.dispatchEvent(new Event('input'));
+            }
+        });
+
+        function finishGame() {
+            isFinished = true;
+            const timeElapsed = (Date.now() - startTime) / 60000;
+            const words = currentSnippet.length / 5;
+            const wpm = Math.round(words / timeElapsed);
+            const accuracy = Math.max(0, 100 - (errors * 2)); // Simple accuracy penalty
+
+            document.getElementById('final-wpm').textContent = wpm + " WPM";
+            document.getElementById('final-accuracy').textContent = accuracy + "%";
+            document.getElementById('result-modal').style.display = 'flex';
+        }
+
+        function nextSnippet() {
+            currentSnippetIndex = (currentSnippetIndex + 1) % snippets.length;
+            loadSnippet(currentSnippetIndex);
+        }
+
+        // Initialize
+        loadSnippet(0);
+
+    </script>
+</body>
+
+</html>

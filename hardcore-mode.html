@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Hardcore</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0000 0%, #330000 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #ff006e;
+            text-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .warning {
+            font-size: 1.5rem;
+            color: #ff006e;
+            margin-bottom: 40px;
+            border: 2px solid #ff006e;
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(255, 0, 110, 0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 0, 110, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #ff006e;
+        }
+
+        #target-word {
+            font-size: 4rem;
+            margin: 60px 0;
+            color: #ff006e;
+            text-shadow: 0 0 30px rgba(255, 0, 110, 0.5);
+            min-height: 80px;
+        }
+
+        #word-input {
+            font-size: 2rem;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #ff006e;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        #word-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        #word-input.error {
+            animation: shake 0.5s;
+            border-color: #ff0000;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        .timer {
+            font-size: 3rem;
+            color: #ff006e;
+            margin: 20px 0;
+        }
+
+        .timer.warning {
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #ff006e;
+            color: #ff006e;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #ff006e;
+            color: #1a0000;
+        }
+
+        #game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #game-over.show {
+            display: flex;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>💀 MODO HARDCORE</h1>
+        <div class="warning">
+            ⚠️ UN SOLO ERROR = GAME OVER ⚠️
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Palabras</div>
+                <div class="stat-value" id="words-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Tiempo</div>
+                <div class="stat-value timer" id="timer">3.0s</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Record</div>
+                <div class="stat-value" id="record">0</div>
+            </div>
+        </div>
+
+        <div id="target-word"></div>
+        <input type="text" id="word-input" placeholder="Escribe PERFECTO..." autocomplete="off">
+
+        <div style="margin-top: 40px;">
+            <button onclick="location.href='game-modes.html'">🏠 Volver</button>
+            <button onclick="location.reload()">🔄 Reiniciar</button>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <h1 style="font-size: 5rem; color: #ff006e;">GAME OVER</h1>
+        <p style="font-size: 2rem; margin: 20px 0;">Palabras completadas: <span id="final-score">0</span></p>
+        <button onclick="location.reload()" style="font-size: 1.5rem;">INTENTAR DE NUEVO</button>
+    </div>
+
+    <script>
+        const words = "muerte peligro riesgo extremo limite critico fatal mortal letal devastador destructivo apocaliptico catastrofico desastroso terrible horrible espantoso aterrador escalofriante siniestro macabro lugubre tenebroso oscuro sombrio negro abismo vacio nada fin final ultimo definitivo absoluto total completo perfecto impecable".split(" ");
+
+        let stats = {
+            wordsTyped: 0,
+            timeLeft: 3.0,
+            timerInterval: null
+        };
+
+        let currentWord = '';
+        let record = localStorage.getItem('hardcoreRecord') || 0;
+        document.getElementById('record').textContent = record;
+
+        function nextWord() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            document.getElementById('target-word').textContent = currentWord;
+            document.getElementById('word-input').value = '';
+            stats.timeLeft = 3.0;
+            startTimer();
+        }
+
+        function startTimer() {
+            if (stats.timerInterval) clearInterval(stats.timerInterval);
+
+            stats.timerInterval = setInterval(() => {
+                stats.timeLeft -= 0.1;
+                const timerEl = document.getElementById('timer');
+                timerEl.textContent = stats.timeLeft.toFixed(1) + 's';
+
+                if (stats.timeLeft <= 1.0) {
+                    timerEl.classList.add('warning');
+                } else {
+                    timerEl.classList.remove('warning');
+                }
+
+                if (stats.timeLeft <= 0) {
+                    gameOver();
+                }
+            }, 100);
+        }
+
+        function gameOver() {
+            clearInterval(stats.timerInterval);
+            document.getElementById('final-score').textContent = stats.wordsTyped;
+
+            if (stats.wordsTyped > record) {
+                localStorage.setItem('hardcoreRecord', stats.wordsTyped);
+                alert('¡NUEVO RECORD! ' + stats.wordsTyped + ' palabras');
+            }
+
+            document.getElementById('game-over').classList.add('show');
+        }
+
+        document.getElementById('word-input').addEventListener('input', (e) => {
+            const input = e.target.value;
+            const target = currentWord;
+
+            if (input === target) {
+                // Palabra correcta
+                stats.wordsTyped++;
+                document.getElementById('words-count').textContent = stats.wordsTyped;
+                nextWord();
+            } else if (!target.startsWith(input)) {
+                // ERROR = GAME OVER
+                e.target.classList.add('error');
+                gameOver();
+            }
+        });
+
+        // Iniciar
+        nextWord();
+        document.getElementById('word-input').focus();
+    </script>
+</body>
+
+</html>

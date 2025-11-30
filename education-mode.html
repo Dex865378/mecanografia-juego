@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Academia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Orbitron:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            font-family: 'Roboto Mono', monospace;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: white;
+            padding: 15px 40px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: #2563eb;
+        }
+
+        .lesson-info {
+            font-weight: bold;
+            color: #64748b;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .display-area {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            background: white;
+            padding: 30px 60px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            letter-spacing: 5px;
+            position: relative;
+        }
+
+        .current-char {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+        }
+
+        .completed {
+            color: #10b981;
+        }
+
+        .keyboard {
+            background: #e2e8f0;
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .key {
+            background: white;
+            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 2px 0 #cbd5e1;
+            transition: all 0.1s;
+        }
+
+        .key.active {
+            background: #2563eb;
+            color: white;
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .key.guide {
+            border: 2px solid #2563eb;
+        }
+
+        .space {
+            width: 300px;
+        }
+
+        .shift {
+            width: 100px;
+        }
+
+        .backspace {
+            width: 80px;
+        }
+
+        .tab {
+            width: 80px;
+        }
+
+        .caps {
+            width: 90px;
+        }
+
+        .enter {
+            width: 90px;
+        }
+
+        .finger-guide {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .hand {
+            width: 150px;
+            opacity: 0.5;
+        }
+
+        .hand.active {
+            opacity: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .instructions {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #475569;
+        }
+
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Roboto Mono', monospace;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Modal de éxito */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <div class="navbar">
+        <div class="logo">VELOCITY ACADEMY</div>
+        <div class="lesson-info" id="lesson-title">Lección 1: Fila Base (ASDF JKLÑ)</div>
+        <button class="btn" onclick="location.href='game-modes.html'"
+            style="margin:0; padding: 5px 15px; font-size: 0.8rem;">Salir</button>
+    </div>
+
+    <div class="main-content">
+        <div class="instructions" id="instruction">Coloca tus dedos índices en las teclas F y J</div>
+
+        <div class="display-area" id="display-text">
+            <!-- Texto generado por JS -->
+        </div>
+
+        <div class="keyboard" id="virtual-keyboard">
+            <!-- Teclado generado o estático -->
+            <div class="row">
+                <div class="key tab">TAB</div>
+                <div class="key" data-key="Q">Q</div>
+                <div class="key" data-key="W">W</div>
+                <div class="key" data-key="E">E</div>
+                <div class="key" data-key="R">R</div>
+                <div class="key" data-key="T">T</div>
+                <div class="key" data-key="Y">Y</div>
+                <div class="key" data-key="U">U</div>
+                <div class="key" data-key="I">I</div>
+                <div class="key" data-key="O">O</div>
+                <div class="key" data-key="P">P</div>
+                <div class="key backspace">⌫</div>
+            </div>
+            <div class="row">
+                <div class="key caps">CAPS</div>
+                <div class="key" data-key="A">A</div>
+                <div class="key" data-key="S">S</div>
+                <div class="key" data-key="D">D</div>
+                <div class="key" data-key="F">F</div>
+                <div class="key" data-key="G">G</div>
+                <div class="key" data-key="H">H</div>
+                <div class="key" data-key="J">J</div>
+                <div class="key" data-key="K">K</div>
+                <div class="key" data-key="L">L</div>
+                <div class="key" data-key="Ñ">Ñ</div>
+                <div class="key enter">↵</div>
+            </div>
+            <div class="row">
+                <div class="key shift">SHIFT</div>
+                <div class="key" data-key="Z">Z</div>
+                <div class="key" data-key="X">X</div>
+                <div class="key" data-key="C">C</div>
+                <div class="key" data-key="V">V</div>
+                <div class="key" data-key="B">B</div>
+                <div class="key" data-key="N">N</div>
+                <div class="key" data-key="M">M</div>
+                <div class="key" data-key=",">,</div>
+                <div class="key" data-key=".">.</div>
+                <div class="key shift">SHIFT</div>
+            </div>
+            <div class="row">
+                <div class="key space" data-key=" ">SPACE</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <h2>¡LECCIÓN COMPLETADA! 🎉</h2>
+            <p>Has dominado esta sección.</p>
+            <button class="btn" onclick="nextLesson()">Siguiente Lección</button>
+        </div>
+    </div>
+
+    <script>
+        const lessons = [
+            {
+                title: "Lección 1: Fila Base",
+                text: "asdf jklñ asdf jklñ aa ss dd ff jj kk ll ññ af sd jk lñ",
+                instruction: "Mantén tus dedos en la fila central."
+            },
+            {
+                title: "Lección 2: Teclas E e I",
+                text: "de ki de ki dede kiki edik idek asde kile",
+                instruction: "Usa el dedo medio para E y K, dedo índice para D."
+            },
+            {
+                title: "Lección 3: Teclas R y U",
+                text: "fr ju fr ju frfr juju rruu urrf far jur",
+                instruction: "Sube tus dedos índices a R y U."
+            }
+        ];
+
+        let currentLessonIdx = 0;
+        let currentText = "";
+        let currentIndex = 0;
+
+        function loadLesson(index) {
+            if (index >= lessons.length) {
+                alert("¡Curso completado! Eres un maestro.");
+                location.href = 'game-modes.html';
+                return;
+            }
+
+            const lesson = lessons[index];
+            document.getElementById('lesson-title').textContent = lesson.title;
+            document.getElementById('instruction').textContent = lesson.instruction;
+
+            currentText = lesson.text;
+            currentIndex = 0;
+            renderText();
+            highlightNextKey();
+            updateProgress();
+            document.getElementById('success-modal').style.display = 'none';
+        }
+
+        function renderText() {
+            const display = document.getElementById('display-text');
+            display.innerHTML = '';
+
+            for (let i = 0; i < currentText.length; i++) {
+                const span = document.createElement('span');
+                span.textContent = currentText[i];
+                if (i < currentIndex) {
+                    span.className = 'completed';
+                } else if (i === currentIndex) {
+                    span.className = 'current-char';
+                }
+                display.appendChild(span);
+            }
+        }
+
+        function highlightNextKey() {
+            // Remove previous highlights
+            document.querySelectorAll('.key').forEach(k => k.classList.remove('guide'));
+
+            if (currentIndex < currentText.length) {
+                const char = currentText[currentIndex].toUpperCase();
+                const keyEl = document.querySelector(`.key[data-key="${char}"]`);
+                if (keyEl) keyEl.classList.add('guide');
+            }
+        }
+
+        function updateProgress() {
+            const pct = (currentIndex / currentText.length) * 100;
+            document.getElementById('progress').style.width = pct + '%';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toUpperCase();
+            const target = currentText[currentIndex].toUpperCase();
+
+            // Visual feedback on keyboard
+            const keyEl = document.querySelector(`.key[data-key="${key}"]`);
+            if (keyEl) {
+                keyEl.classList.add('active');
+                setTimeout(() => keyEl.classList.remove('active'), 100);
+            }
+
+            if (e.key.toLowerCase() === currentText[currentIndex].toLowerCase()) {
+                currentIndex++;
+                renderText();
+                highlightNextKey();
+                updateProgress();
+
+                if (currentIndex >= currentText.length) {
+                    document.getElementById('success-modal').style.display = 'flex';
+                }
+            }
+        });
+
+        function nextLesson() {
+            currentLessonIdx++;
+            loadLesson(currentLessonIdx);
+        }
+
+        // Init
+        loadLesson(0);
+
+    </script>
+</body>
+
+</html>

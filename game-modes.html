@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modos de Juego</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            padding: 40px 20px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 50px;
+            background: linear-gradient(45deg, #b026ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(176, 38, 255, 0.5);
+        }
+
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #b026ff, #00ff88);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .mode-card:hover {
+            border-color: #b026ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(176, 38, 255, 0.3);
+        }
+
+        .mode-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .mode-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .mode-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+
+        .mode-description {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .mode-difficulty {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .easy {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .medium {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .hard {
+            background: rgba(255, 0, 110, 0.2);
+            color: #ff006e;
+        }
+
+        .expert {
+            background: rgba(176, 38, 255, 0.2);
+            color: #b026ff;
+        }
+
+        .back-btn {
+            display: block;
+            margin: 0 auto;
+            background: transparent;
+            border: 2px solid #b026ff;
+            color: #b026ff;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #b026ff;
+            color: white;
+            box-shadow: 0 0 20px rgba(176, 38, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .modes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎮 SELECCIONA TU MODO</h1>
+
+        <div class="modes-grid">
+            <!-- Modo Clásico -->
+            <div class="mode-card" onclick="location.href='classic-mode.html'">
+                <span class="mode-icon">⚡</span>
+                <h2 class="mode-title">Modo Clásico</h2>
+                <p class="mode-description">
+                    El modo original. 5 segundos por palabra, power-ups, logros y música dinámica.
+                </p>
+                <span class="mode-difficulty medium">MEDIO</span>
+            </div>
+
+            <!-- Modo Nave -->
+            <div class="mode-card" onclick="location.href='ship-mode.html'">
+                <span class="mode-icon">🚀</span>
+                <h2 class="mode-title">Batalla Espacial</h2>
+                <p class="mode-description">
+                    Estilo Z-Type. Dispara láseres escribiendo. Niveles progresivos infinitos.
+                </p>
+                <span class="mode-difficulty hard">DIFÍCIL</span>
+            </div>
+
+            <!-- Modo Zen -->
+            <div class="mode-card" onclick="location.href='zen-mode.html'">
+                <span class="mode-icon">🧘</span>
+                <h2 class="mode-title">Modo Zen</h2>
+                <p class="mode-description">
+                    Sin presión de tiempo. Enfócate en la precisión. Perfecto para aprender.
+                </p>
+                <span class="mode-difficulty easy">FÁCIL</span>
+            </div>
+
+            <!-- Modo Hardcore -->
+            <div class="mode-card" onclick="location.href='hardcore-mode.html'">
+                <span class="mode-icon">💀</span>
+                <h2 class="mode-title">Modo Hardcore</h2>
+                <p class="mode-description">
+                    Una sola vida. Sin errores permitidos. Solo para los mejores.
+                </p>
+                <span class="mode-difficulty expert">EXPERTO</span>
+            </div>
+
+            <!-- Modo Dictado -->
+            <div class="mode-card" onclick="location.href='dictation-mode.html'">
+                <span class="mode-icon">🎧</span>
+                <h2 class="mode-title">Modo Dictado</h2>
+                <p class="mode-description">
+                    Escucha la palabra y escríbela. Mejora tu ortografía y velocidad.
+                </p>
+                <span class="mode-difficulty medium">MEDIO</span>
+            </div>
+
+            <!-- Modo Código -->
+            <div class="mode-card" onclick="location.href='code-mode.html'">
+                <span class="mode-icon">💻</span>
+                <h2 class="mode-title">Modo Código</h2>
+                <p class="mode-description">
+                    Escribe snippets de código. Ideal para programadores.
+                </p>
+                <span class="mode-difficulty hard">DIFÍCIL</span>
+            </div>
+
+            <!-- Modo Educativo -->
+            <div class="mode-card" onclick="location.href='education-mode.html'">
+                <span class="mode-icon">📚</span>
+                <h2 class="mode-title">Modo Educativo</h2>
+                <p class="mode-description">
+                    Aprende mecanografía desde cero. Lecciones paso a paso.
+                </p>
+                <span class="mode-difficulty easy">PRINCIPIANTE</span>
+            </div>
+
+            <!-- Desafío Diario -->
+            <div class="mode-card" onclick="location.href='daily-challenge.html'">
+                <span class="mode-icon">🏆</span>
+                <h2 class="mode-title">Desafío Diario</h2>
+                <p class="mode-description">
+                    Un reto nuevo cada día. Compite con jugadores de todo el mundo.
+                </p>
+                <span class="mode-difficulty medium">DIARIO</span>
+            </div>
+        </div>
+
+        <button class="back-btn" onclick="location.href='index.html'">
+            🏠 VOLVER AL MENÚ PRINCIPAL
+        </button>
+    </div>
+</body>
+
+</html>

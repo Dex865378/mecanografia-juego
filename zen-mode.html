@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Zen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #00ff88;
+        }
+
+        #target-word {
+            font-size: 4rem;
+            margin: 60px 0;
+            color: #00ff88;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            min-height: 80px;
+        }
+
+        #word-input {
+            font-size: 2rem;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        #word-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            min-height: 40px;
+        }
+
+        .correct {
+            color: #00ff88;
+        }
+
+        .wrong {
+            color: #ff006e;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>🧘 MODO ZEN</h1>
+        <p class="subtitle">Sin presión. Enfócate en la precisión.</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Palabras</div>
+                <div class="stat-value" id="words-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Precisión</div>
+                <div class="stat-value" id="accuracy">100%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Racha</div>
+                <div class="stat-value" id="streak">0</div>
+            </div>
+        </div>
+
+        <div id="target-word"></div>
+        <input type="text" id="word-input" placeholder="Escribe aquí..." autocomplete="off">
+        <div class="feedback" id="feedback"></div>
+
+        <div style="margin-top: 40px;">
+            <button onclick="location.href='game-modes.html'">🏠 Volver</button>
+            <button onclick="location.reload()">🔄 Reiniciar</button>
+        </div>
+    </div>
+
+    <script>
+        const words = "paz calma serenidad tranquilidad meditacion respirar enfoque presente momento ahora aqui silencio armonia equilibrio balance fluir soltar aceptar agradecer sonreir amar vivir sentir observar escuchar comprender perdonar liberar sanar crecer evolucionar transformar iluminar despertar consciencia mindfulness gratitud compasion empatia bondad gentileza paciencia tolerancia respeto humildad sabiduria claridad vision intuicion inspiracion creatividad imaginacion belleza arte musica naturaleza cielo mar montana bosque flor arbol pajaro mariposa luz sol luna estrella nube viento agua fuego tierra vida amor felicidad alegria gozo dicha plenitud abundancia prosperidad exito logro victoria triunfo".split(" ");
+
+        let stats = {
+            wordsTyped: 0,
+            correctChars: 0,
+            totalChars: 0,
+            streak: 0
+        };
+
+        let currentWord = '';
+
+        function nextWord() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            document.getElementById('target-word').textContent = currentWord;
+            document.getElementById('word-input').value = '';
+            document.getElementById('feedback').textContent = '';
+        }
+
+        function updateStats() {
+            document.getElementById('words-count').textContent = stats.wordsTyped;
+            const accuracy = stats.totalChars > 0
+                ? Math.round((stats.correctChars / stats.totalChars) * 100)
+                : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            document.getElementById('streak').textContent = stats.streak;
+        }
+
+        document.getElementById('word-input').addEventListener('input', (e) => {
+            const input = e.target.value;
+            const target = currentWord;
+
+            if (input === target) {
+                // Palabra correcta
+                stats.wordsTyped++;
+                stats.correctChars += target.length;
+                stats.totalChars += target.length;
+                stats.streak++;
+
+                document.getElementById('feedback').textContent = '✓ Perfecto';
+                document.getElementById('feedback').className = 'feedback correct';
+
+                updateStats();
+                setTimeout(nextWord, 500);
+            } else if (!target.startsWith(input)) {
+                // Error
+                stats.totalChars++;
+                stats.streak = 0;
+
+                document.getElementById('feedback').textContent = '✗ Revisa';
+                document.getElementById('feedback').className = 'feedback wrong';
+                updateStats();
+            } else {
+                // Correcto hasta ahora
+                stats.correctChars++;
+                stats.totalChars++;
+                document.getElementById('feedback').textContent = '';
+                updateStats();
+            }
+        });
+
+        // Iniciar
+        nextWord();
+        document.getElementById('word-input').focus();
+    </script>
+</body>
+
+</html>
