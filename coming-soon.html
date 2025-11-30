@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Próximamente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #b026ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 50px;
+            font-size: 1.2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(176, 38, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .feature-card:hover {
+            border-color: #b026ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(176, 38, 255, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .feature-preview {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(241, 196, 15, 0.2);
+            color: #f1c40f;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid #b026ff;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: #aaa;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #ff006e;
+        }
+
+        .modal-icon {
+            font-size: 5rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-description {
+            color: #ddd;
+            line-height: 1.8;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-features {
+            background: rgba(0, 255, 136, 0.05);
+            border-left: 3px solid #00ff88;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .modal-features h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .modal-features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .modal-features li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .modal-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            display: block;
+            margin: 40px auto 0;
+            background: transparent;
+            border: 2px solid #b026ff;
+            color: #b026ff;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #b026ff;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 PRÓXIMAMENTE</h1>
+        <p class="subtitle">Funcionalidades épicas que llegarán pronto a VELOCITY</p>
+
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card" onclick="showModal('historia')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">📖</div>
+                <h3 class="feature-title">Modo Historia</h3>
+                <p class="feature-preview">Campaña épica con 50 niveles progresivos y jefes finales...</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card" onclick="showModal('survival')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">⚔️</div>
+                <h3 class="feature-title">Modo Survival</h3>
+                <p class="feature-preview">Palabras infinitas cada vez más rápidas. ¿Cuánto aguantas?</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card" onclick="showModal('versus-ia')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">Versus IA</h3>
+                <p class="feature-preview">Compite contra un bot inteligente en tiempo real...</p>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card" onclick="showModal('idiomas')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🌍</div>
+                <h3 class="feature-title">Modo Idiomas</h3>
+                <p class="feature-preview">Aprende inglés, francés, alemán y más mientras juegas...</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="feature-card" onclick="showModal('niveles')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">⭐</div>
+                <h3 class="feature-title">Sistema de Niveles</h3>
+                <p class="feature-preview">Gana XP, sube de nivel y desbloquea recompensas...</p>
+            </div>
+
+            <!-- Feature 6 -->
+            <div class="feature-card" onclick="showModal('logros')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🏆</div>
+                <h3 class="feature-title">Logros Secretos</h3>
+                <p class="feature-preview">Desbloquea achievements ocultos y demuestra tu maestría...</p>
+            </div>
+
+            <!-- Feature 7 -->
+            <div class="feature-card" onclick="showModal('monedas')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">💰</div>
+                <h3 class="feature-title">Sistema de Monedas</h3>
+                <p class="feature-preview">Gana monedas jugando y compra en la tienda...</p>
+            </div>
+
+            <!-- Feature 8 -->
+            <div class="feature-card" onclick="showModal('avatar')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">👤</div>
+                <h3 class="feature-title">Personalización Avatar</h3>
+                <p class="feature-preview">Crea tu identidad única con avatares y badges...</p>
+            </div>
+
+            <!-- Feature 9 -->
+            <div class="feature-card" onclick="showModal('1v1')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Modo 1v1 Online</h3>
+                <p class="feature-preview">Duelos en tiempo real contra jugadores de todo el mundo...</p>
+            </div>
+
+            <!-- Feature 10 -->
+            <div class="feature-card" onclick="showModal('musica')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🎵</div>
+                <h3 class="feature-title">Música Dinámica</h3>
+                <p class="feature-preview">Playlist personalizable e integración con Spotify...</p>
+            </div>
+
+            <!-- Feature 11 -->
+            <div class="feature-card" onclick="showModal('entrenamiento')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🧠</div>
+                <h3 class="feature-title">Entrenamiento IA</h3>
+                <p class="feature-preview">IA analiza tus debilidades y crea ejercicios personalizados...</p>
+            </div>
+
+            <!-- Feature 12 -->
+            <div class="feature-card" onclick="showModal('api')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🔌</div>
+                <h3 class="feature-title">API Pública</h3>
+                <p class="feature-preview">Integra VELOCITY en tus proyectos con nuestra API...</p>
+            </div>
+
+            <!-- Feature 13 -->
+            <div class="feature-card" onclick="showModal('meme')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">😂</div>
+                <h3 class="feature-title">Modo Meme</h3>
+                <p class="feature-preview">Palabras random graciosas y frases de memes...</p>
+            </div>
+
+            <!-- Feature 14 -->
+            <div class="feature-card" onclick="showModal('karaoke')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">🎤</div>
+                <h3 class="feature-title">Modo Karaoke</h3>
+                <p class="feature-preview">Escribe la letra mientras suena tu canción favorita...</p>
+            </div>
+
+            <!-- Feature 15 -->
+            <div class="feature-card" onclick="showModal('ciego')">
+                <span class="status-badge">PRONTO</span>
+                <div class="feature-icon">👁️</div>
+                <h3 class="feature-title">Modo Ciego</h3>
+                <p class="feature-preview">Pantalla negra, solo audio. Para verdaderos maestros...</p>
+            </div>
+        </div>
+
+        <button class="back-btn" onclick="location.href='index.html'">🏠 VOLVER AL MENÚ</button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-icon" id="modal-icon"></div>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <p class="modal-description" id="modal-description"></p>
+            <div class="modal-features" id="modal-features"></div>
+        </div>
+    </div>
+
+    <script>
+        const features = {
+            historia: {
+                icon: "📖",
+                title: "Modo Historia / Campaña",
+                description: "Embárcate en una aventura épica a través de 50 niveles únicos. Cada nivel presenta desafíos progresivamente más difíciles, desde palabras simples hasta párrafos complejos. Enfréntate a jefes finales que pondrán a prueba todo lo que has aprendido.",
+                features: [
+                    "50 niveles progresivos con dificultad creciente",
+                    "5 mundos temáticos (Tecnología, Naturaleza, Espacio, Historia, Futuro)",
+                    "Jefes finales cada 10 niveles con mecánicas únicas",
+                    "Sistema de 3 estrellas por nivel",
+                    "Narrativa cyberpunk inmersiva",
+                    "Cinemáticas entre mundos",
+                    "Desbloquea personajes y power-ups especiales"
+                ]
+            },
+            survival: {
+                icon: "⚔️",
+                title: "Modo Survival",
+                description: "Pon a prueba tu resistencia en este modo infinito donde las palabras aparecen cada vez más rápido. No hay límite de tiempo, solo tu habilidad para mantener el ritmo. Compite por el primer lugar en la tabla mundial de supervivencia.",
+                features: [
+                    "Palabras infinitas con velocidad creciente",
+                    "Sistema de oleadas (cada 10 palabras aumenta la velocidad)",
+                    "Tabla de récords mundial en tiempo real",
+                    "Power-ups aleatorios para sobrevivir más tiempo",
+                    "Modo 'Hardcore Survival' sin power-ups",
+                    "Estadísticas detalladas de tu mejor racha",
+                    "Recompensas especiales por hitos (100, 500, 1000 palabras)"
+                ]
+            },
+            "versus-ia": {
+                icon: "🤖",
+                title: "Modo Versus IA",
+                description: "Compite contra un oponente de inteligencia artificial que se adapta a tu nivel. Observa cómo el bot escribe en tiempo real y trata de superarlo. Elige entre 5 niveles de dificultad, desde 'Principiante' hasta 'Imposible'.",
+                features: [
+                    "5 niveles de dificultad IA (Fácil, Normal, Difícil, Experto, Imposible)",
+                    "El bot escribe visualmente en pantalla",
+                    "IA adaptativa que aprende de tu velocidad",
+                    "Modo 'Mejor de 3' o 'Mejor de 5'",
+                    "Diferentes personalidades de IA (Agresivo, Defensivo, Equilibrado)",
+                    "Desbloquea nuevos bots al ganar",
+                    "Estadísticas de victorias/derrotas"
+                ]
+            },
+            idiomas: {
+                icon: "🌍",
+                title: "Modo Idiomas",
+                description: "Aprende y practica mecanografía en múltiples idiomas. Cada idioma incluye vocabulario específico y frases comunes. Perfecto para estudiantes de idiomas o políglotas que quieren mejorar su velocidad en diferentes teclados.",
+                features: [
+                    "6 idiomas disponibles: Inglés, Francés, Alemán, Italiano, Portugués, Japonés",
+                    "Vocabulario categorizado (Básico, Intermedio, Avanzado)",
+                    "Modo 'Traducción': palabra en español, escribe en otro idioma",
+                    "Soporte para caracteres especiales (ñ, ü, ç, etc.)",
+                    "Lecciones específicas por idioma",
+                    "Certificado de competencia por idioma",
+                    "Integración con diccionarios para definiciones"
+                ]
+            },
+            niveles: {
+                icon: "⭐",
+                title: "Sistema de Niveles & XP",
+                description: "Gana experiencia (XP) por cada palabra que escribas correctamente. Sube de nivel del 1 al 100 y desbloquea recompensas exclusivas en cada hito. Tu nivel se muestra en tu perfil y en las tablas de clasificación.",
+                features: [
+                    "100 niveles de progresión",
+                    "XP por palabra correcta (más XP por palabras largas)",
+                    "Bonificación de XP por rachas y combos",
+                    "Recompensas cada 5 niveles (temas, avatares, títulos)",
+                    "Barra de progreso visual en el HUD",
+                    "Requisitos de XP escalados (nivel 1: 100 XP, nivel 100: 50,000 XP)",
+                    "Prestigio: Reinicia al nivel 1 con beneficios permanentes"
+                ]
+            },
+            logros: {
+                icon: "🏆",
+                title: "Logros Secretos",
+                description: "Descubre y desbloquea más de 50 logros ocultos. Algunos son fáciles, otros extremadamente difíciles. Cada logro otorga puntos de logro que contribuyen a tu puntuación total de maestría.",
+                features: [
+                    "50+ logros únicos (comunes, raros, épicos, legendarios)",
+                    "Logros secretos que no se revelan hasta desbloquearlos",
+                    "Ejemplos: 'Velocista' (100 WPM), 'Madrugador' (juega a las 3 AM)",
+                    "'Perfeccionista' (100% precisión en 100 palabras seguidas)",
+                    "Notificaciones animadas al desbloquear",
+                    "Galería de logros con estadísticas de rareza",
+                    "Títulos especiales por completar colecciones de logros"
+                ]
+            },
+            monedas: {
+                icon: "💰",
+                title: "Sistema de Monedas",
+                description: "Gana monedas virtuales jugando cualquier modo. Usa tus monedas en la tienda para comprar temas visuales, efectos de sonido, avatares y power-ups permanentes. No hay microtransacciones, todo se gana jugando.",
+                features: [
+                    "Gana monedas por cada partida (basado en rendimiento)",
+                    "Bonificación diaria por iniciar sesión",
+                    "Tienda con 100+ items desbloqueables",
+                    "Categorías: Temas, Avatares, Efectos de sonido, Power-ups",
+                    "Items comunes (100 monedas) a legendarios (10,000 monedas)",
+                    "Ofertas especiales rotativas cada semana",
+                    "Sistema de 'Cofres' aleatorios con recompensas"
+                ]
+            },
+            avatar: {
+                icon: "👤",
+                title: "Personalización de Avatar",
+                description: "Crea tu identidad única en VELOCITY. Elige entre cientos de combinaciones de avatares, marcos, badges y colores de acento. Tu avatar se muestra en tu perfil, en las tablas de clasificación y en partidas multijugador.",
+                features: [
+                    "50+ avatares (emojis, iconos, personajes)",
+                    "Marcos decorativos para tu avatar (desbloqueables)",
+                    "Badges de logros que se muestran en tu perfil",
+                    "Paleta de colores personalizable (acento principal)",
+                    "Títulos desbloqueables ('Maestro del Teclado', 'Velocista')",
+                    "Efectos de partículas al escribir (fuego, estrellas, neón)",
+                    "Preview en tiempo real antes de guardar"
+                ]
+            },
+            "1v1": {
+                icon: "⚡",
+                title: "Modo 1v1 Online",
+                description: "Enfréntate a jugadores reales de todo el mundo en duelos de mecanografía en tiempo real. Sistema de matchmaking justo basado en tu nivel. Crea salas privadas con código para jugar con amigos.",
+                features: [
+                    "Matchmaking automático por nivel de habilidad (ELO)",
+                    "Salas privadas con código de 6 dígitos",
+                    "Chat en vivo durante la partida",
+                    "Visualización del progreso del oponente en tiempo real",
+                    "Modo 'Mejor de 3' o partida única",
+                    "Sistema de ranking competitivo (Bronce, Plata, Oro, Platino, Diamante)",
+                    "Recompensas por victorias consecutivas",
+                    "Historial de partidas y estadísticas vs otros jugadores"
+                ]
+            },
+            musica: {
+                icon: "🎵",
+                title: "Música Dinámica Mejorada",
+                description: "Mejora tu experiencia con un sistema de audio completamente personalizable. Elige entre playlists predefinidas o conecta tu cuenta de Spotify. La música se adapta a la intensidad del juego.",
+                features: [
+                    "10 playlists temáticas (Lofi, Synthwave, Electrónica, Clásica, etc.)",
+                    "Integración con Spotify (reproduce tus propias playlists)",
+                    "Música adaptativa: cambia según tu velocidad y combos",
+                    "Efectos de sonido personalizables (teclado mecánico, sci-fi, retro)",
+                    "Ecualizador visual sincronizado con la música",
+                    "Modo 'Sin música' con solo efectos ambientales",
+                    "Volumen independiente para música y efectos"
+                ]
+            },
+            entrenamiento: {
+                icon: "🧠",
+                title: "Entrenamiento Personalizado con IA",
+                description: "Una IA analiza tus estadísticas y detecta tus puntos débiles. Genera ejercicios personalizados para mejorar específicamente donde más lo necesitas. Perfecto para mejorar de forma eficiente.",
+                features: [
+                    "Análisis de teclas problemáticas (ej: 'Fallas mucho en Q y Ñ')",
+                    "Ejercicios generados automáticamente para tus debilidades",
+                    "Mapa de calor del teclado mostrando errores",
+                    "Sugerencias de posición de dedos",
+                    "Plan de entrenamiento de 30 días",
+                    "Seguimiento de mejora semanal con gráficos",
+                    "Predicción de tu WPM máximo potencial"
+                ]
+            },
+            api: {
+                icon: "🔌",
+                title: "API Pública",
+                description: "Desarrolladores pueden integrar VELOCITY en sus propios proyectos. Accede a estadísticas, tablas de clasificación, y crea aplicaciones personalizadas. Documentación completa y ejemplos incluidos.",
+                features: [
+                    "API REST con endpoints documentados",
+                    "Obtener estadísticas de usuario (WPM, precisión, nivel)",
+                    "Acceso a tablas de clasificación globales",
+                    "Webhook para eventos (nuevo logro, subida de nivel)",
+                    "Widget embebible para blogs/sitios web",
+                    "Discord bot oficial con comandos de estadísticas",
+                    "Rate limiting justo (1000 requests/hora gratis)",
+                    "Ejemplos en JavaScript, Python, PHP"
+                ]
+            },
+            meme: {
+                icon: "😂",
+                title: "Modo Meme",
+                description: "El modo más divertido de VELOCITY. Escribe frases de memes famosos, palabras random graciosas y referencias de internet. Incluye easter eggs secretos y sorpresas inesperadas.",
+                features: [
+                    "Frases de memes clásicos ('All your base are belong to us')",
+                    "Palabras absurdas y divertidas",
+                    "Referencias a cultura pop (películas, series, videojuegos)",
+                    "Easter eggs secretos (escribe 'konami' para sorpresa)",
+                    "Modo 'Copypasta': escribe copypastas famosos completos",
+                    "Efectos visuales locos (pantalla invertida, texto al revés)",
+                    "Logros especiales solo en este modo"
+                ]
+            },
+            karaoke: {
+                icon: "🎤",
+                title: "Modo Karaoke",
+                description: "Combina música y mecanografía. Escribe la letra de canciones mientras suenan, con sincronización perfecta. Incluye una biblioteca de canciones populares en español e inglés.",
+                features: [
+                    "50+ canciones populares pre-cargadas",
+                    "Sincronización perfecta letra-audio",
+                    "Resaltado de la palabra actual como karaoke real",
+                    "Puntuación por timing (bonus si escribes justo a tiempo)",
+                    "Categorías: Pop, Rock, Rap, Clásicos",
+                    "Modo 'Importar': pega letra + URL de YouTube",
+                    "Tabla de clasificación por canción",
+                    "Desbloquea nuevas canciones con monedas"
+                ]
+            },
+            ciego: {
+                icon: "👁️",
+                title: "Modo Ciego",
+                description: "El desafío definitivo. La pantalla se vuelve completamente negra después de mostrar la palabra por 2 segundos. Solo tienes el audio y tu memoria muscular. Solo para verdaderos maestros del teclado.",
+                features: [
+                    "Pantalla negra total (solo se ve la palabra 2 segundos)",
+                    "Audio que pronuncia cada palabra",
+                    "Feedback auditivo por tecla correcta/incorrecta",
+                    "Modo 'Semi-ciego': solo se oscurece el teclado",
+                    "Logro especial 'Maestro Ciego' (100 palabras perfectas)",
+                    "Tabla de clasificación exclusiva",
+                    "Entrenamiento progresivo (3s → 2s → 1s → 0s de vista)"
+                ]
+            }
+        };
+
+        function showModal(featureId) {
+            const feature = features[featureId];
+            if (!feature) return;
+
+            document.getElementById('modal-icon').textContent = feature.icon;
+            document.getElementById('modal-title').textContent = feature.title;
+            document.getElementById('modal-description').textContent = feature.description;
+
+            const featuresHTML = `
+                <h3>Características Principales:</h3>
+                <ul>
+                    ${feature.features.map(f => `<li>${f}</li>`).join('')}
+                </ul>
+            `;
+            document.getElementById('modal-features').innerHTML = featuresHTML;
+
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+
+</html>
