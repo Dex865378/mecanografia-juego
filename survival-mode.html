@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Survival</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a0000 0%, #4a0000 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            text-align: center;
+            max-width: 900px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            color: #ff3333;
+            text-shadow: 0 0 30px rgba(255, 51, 51, 0.8);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .wave-info {
+            font-size: 1.5rem;
+            color: #ffaa00;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 51, 51, 0.3);
+            min-width: 150px;
+            margin: 10px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            color: #ff3333;
+            font-weight: bold;
+        }
+
+        #target-word {
+            font-size: 4.5rem;
+            margin: 60px 0;
+            color: #ff3333;
+            text-shadow: 0 0 40px rgba(255, 51, 51, 0.6);
+            min-height: 100px;
+            animation: glow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
+            }
+
+            50% {
+                text-shadow: 0 0 40px rgba(255, 51, 51, 1);
+            }
+        }
+
+        #word-input {
+            font-size: 2.5rem;
+            padding: 25px;
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid #ff3333;
+            border-radius: 15px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        #word-input:focus {
+            outline: none;
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.8);
+        }
+
+        .speed-indicator {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: #ffaa00;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #ff3333;
+            color: #ff3333;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #ff3333;
+            color: black;
+        }
+
+        #game-over {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #game-over.show {
+            display: flex;
+        }
+
+        .powerup-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 170, 0, 0.9);
+            color: black;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            animation: slideIn 0.5s;
+            display: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>⚔️ MODO SURVIVAL</h1>
+        <div class="wave-info">Oleada <span id="wave">1</span> - Velocidad: <span id="speed">Normal</span></div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Palabras</div>
+                <div class="stat-value" id="words-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Récord</div>
+                <div class="stat-value" id="record">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Vidas</div>
+                <div class="stat-value" id="lives">3</div>
+            </div>
+        </div>
+
+        <div id="target-word">Presiona ENTER para comenzar</div>
+        <input type="text" id="word-input" placeholder="Escribe aquí..." autocomplete="off" disabled>
+        <div class="speed-indicator">Tiempo restante: <span id="timer">5.0s</span></div>
+
+        <div style="margin-top: 40px;">
+            <button onclick="location.href='game-modes.html'">🏠 Volver</button>
+            <button onclick="location.reload()">🔄 Reiniciar</button>
+        </div>
+    </div>
+
+    <div class="powerup-notification" id="powerup-notif"></div>
+
+    <div id="game-over">
+        <h1 style="font-size: 5rem; color: #ff3333;">GAME OVER</h1>
+        <p style="font-size: 2.5rem; margin: 30px 0;">Sobreviviste: <span id="final-score">0</span> palabras</p>
+        <p style="font-size: 1.5rem; color: #ffaa00;">Oleada alcanzada: <span id="final-wave">1</span></p>
+        <button onclick="location.reload()" style="font-size: 1.5rem; margin-top: 30px;">INTENTAR DE NUEVO</button>
+    </div>
+
+    <script>
+        const words = "velocidad resistencia supervivencia combate batalla guerra estrategia táctica defensa ataque poder fuerza energía impulso acción reacción movimiento rapidez agilidad destreza habilidad maestría dominio control precisión exactitud perfección excelencia victoria triunfo gloria honor valor coraje valentía determinación voluntad espíritu alma corazón mente cuerpo".split(" ");
+
+        let stats = {
+            wordsTyped: 0,
+            wave: 1,
+            lives: 3,
+            baseTime: 5.0,
+            timeLeft: 5.0,
+            timerInterval: null,
+            gameActive: false
+        };
+
+        let currentWord = '';
+        let record = localStorage.getItem('survivalRecord') || 0;
+        document.getElementById('record').textContent = record;
+
+        function getSpeedName() {
+            if (stats.wave <= 3) return "Normal";
+            if (stats.wave <= 6) return "Rápido";
+            if (stats.wave <= 10) return "Muy Rápido";
+            if (stats.wave <= 15) return "Extremo";
+            return "IMPOSIBLE";
+        }
+
+        function getTimeForWave() {
+            return Math.max(1.5, stats.baseTime - (stats.wave - 1) * 0.3);
+        }
+
+        function nextWord() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            document.getElementById('target-word').textContent = currentWord;
+            document.getElementById('word-input').value = '';
+
+            stats.timeLeft = getTimeForWave();
+            startTimer();
+        }
+
+        function startTimer() {
+            if (stats.timerInterval) clearInterval(stats.timerInterval);
+
+            stats.timerInterval = setInterval(() => {
+                stats.timeLeft -= 0.1;
+                const timerEl = document.getElementById('timer');
+                timerEl.textContent = stats.timeLeft.toFixed(1) + 's';
+
+                if (stats.timeLeft <= 0) {
+                    loseLife();
+                }
+            }, 100);
+        }
+
+        function loseLife() {
+            stats.lives--;
+            document.getElementById('lives').textContent = stats.lives;
+
+            if (stats.lives <= 0) {
+                gameOver();
+            } else {
+                nextWord();
+            }
+        }
+
+        function gameOver() {
+            clearInterval(stats.timerInterval);
+            stats.gameActive = false;
+            document.getElementById('word-input').disabled = true;
+            document.getElementById('final-score').textContent = stats.wordsTyped;
+            document.getElementById('final-wave').textContent = stats.wave;
+
+            if (stats.wordsTyped > record) {
+                localStorage.setItem('survivalRecord', stats.wordsTyped);
+                showPowerup('¡NUEVO RÉCORD! ' + stats.wordsTyped + ' palabras');
+            }
+
+            document.getElementById('game-over').classList.add('show');
+        }
+
+        function showPowerup(message) {
+            const notif = document.getElementById('powerup-notif');
+            notif.textContent = message;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 3000);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !stats.gameActive) {
+                stats.gameActive = true;
+                document.getElementById('word-input').disabled = false;
+                document.getElementById('word-input').focus();
+                nextWord();
+            }
+        });
+
+        document.getElementById('word-input').addEventListener('input', (e) => {
+            if (!stats.gameActive) return;
+
+            const input = e.target.value.trim();
+            const target = currentWord;
+
+            if (input === target) {
+                stats.wordsTyped++;
+                document.getElementById('words-count').textContent = stats.wordsTyped;
+
+                // Cada 10 palabras = nueva oleada
+                if (stats.wordsTyped % 10 === 0) {
+                    stats.wave++;
+                    document.getElementById('wave').textContent = stats.wave;
+                    document.getElementById('speed').textContent = getSpeedName();
+                    showPowerup('¡OLEADA ' + stats.wave + '!');
+
+                    // Bonus de vida cada 3 oleadas
+                    if (stats.wave % 3 === 0 && stats.lives < 5) {
+                        stats.lives++;
+                        document.getElementById('lives').textContent = stats.lives;
+                        showPowerup('+1 VIDA');
+                    }
+                }
+
+                nextWord();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Meme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Orbitron:wght@700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            color: white;
+            font-family: 'Comic Neue', cursive;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rainbow 10s infinite;
+        }
+
+        @keyframes rainbow {
+            0% {
+                background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            }
+
+            25% {
+                background: linear-gradient(135deg, #ffff00 0%, #ff00ff 100%);
+            }
+
+            50% {
+                background: linear-gradient(135deg, #00ffff 0%, #ffff00 100%);
+            }
+
+            75% {
+                background: linear-gradient(135deg, #ff00ff 0%, #00ff00 100%);
+            }
+
+            100% {
+                background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            }
+        }
+
+        .game-container {
+            text-align: center;
+            max-width: 900px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 30px;
+            border: 5px solid #ffff00;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ffff00;
+            text-shadow: 3px 3px 0 #ff00ff, 6px 6px 0 #00ffff;
+            animation: wobble 2s infinite;
+        }
+
+        @keyframes wobble {
+
+            0%,
+            100% {
+                transform: rotate(-3deg);
+            }
+
+            50% {
+                transform: rotate(3deg);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #00ffff;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            border: 3px solid #ffff00;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #ffff00;
+        }
+
+        #target-word {
+            font-size: 3rem;
+            margin: 40px 0;
+            color: #ffff00;
+            text-shadow: 2px 2px 0 #ff00ff;
+            min-height: 80px;
+            font-weight: bold;
+        }
+
+        #word-input {
+            font-size: 2rem;
+            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            color: #ffff00;
+            font-family: 'Comic Neue', cursive;
+            text-align: center;
+        }
+
+        button {
+            background: #ff00ff;
+            border: 3px solid #ffff00;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Comic Neue', cursive;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #00ffff;
+            transform: scale(1.1);
+        }
+
+        .easter-egg {
+            position: fixed;
+            font-size: 5rem;
+            animation: float 3s ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-500px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>😂 MODO MEME</h1>
+        <p class="subtitle">¡Las palabras más random de internet!</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div>Memes</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div>Combo</div>
+                <div class="stat-value" id="combo">0</div>
+            </div>
+        </div>
+
+        <div id="target-word">¡Presiona ENTER para empezar!</div>
+        <input type="text" id="word-input" placeholder="xD" autocomplete="off" disabled>
+
+        <div style="margin-top: 40px;">
+            <button onclick="location.href='game-modes.html'">🏠 Volver</button>
+            <button onclick="triggerEasterEgg()">🎉 Easter Egg</button>
+        </div>
+    </div>
+
+    <script>
+        const memeWords = [
+            "stonks", "doge", "pepe", "poggers", "kekw", "lmao", "rofl", "yeet",
+            "bruh", "oof", "uwu", "owo", "sus", "amogus", "cringe", "based",
+            "chad", "simp", "boomer", "zoomer", "karen", "ok boomer", "no cap",
+            "sheesh", "bussin", "slay", "periodt", "vibe check", "ratio",
+            "touch grass", "copium", "hopium", "monkas", "pepega", "sadge",
+            "pog", "pog champ", "ez clap", "press f", "big brain", "smol brain",
+            "bonk", "horny jail", "this is fine", "surprised pikachu", "stonks",
+            "not stonks", "visible confusion", "i see this as absolute win",
+            "outstanding move", "wait thats illegal", "ah yes enslaved",
+            "you guys are getting paid", "always has been", "never gonna give you up",
+            "rickroll", "troll face", "rage quit", "epic fail", "win",
+            "nyan cat", "keyboard cat", "grumpy cat", "ceiling cat", "longcat",
+            "all your base", "over 9000", "do a barrel roll", "the cake is a lie",
+            "arrow to the knee", "leroy jenkins", "pwned", "noob", "pro",
+            "gg", "gg wp", "gg ez", "rekt", "git gud", "skill issue"
+        ];
+
+        const easterEggs = {
+            "konami": "🎮 ¡CÓDIGO KONAMI ACTIVADO!",
+            "rickroll": "🎵 Never gonna give you up...",
+            "stonks": "📈 STONKS ↗️",
+            "doge": "🐕 Much wow, very type, so fast"
+        };
+
+        let stats = {
+            score: 0,
+            combo: 0,
+            gameActive: false
+        };
+
+        let currentWord = '';
+
+        function nextWord() {
+            currentWord = memeWords[Math.floor(Math.random() * memeWords.length)];
+            document.getElementById('target-word').textContent = currentWord;
+            document.getElementById('word-input').value = '';
+        }
+
+        function triggerEasterEgg() {
+            const emojis = ['🎉', '🎊', '🎈', '🎁', '✨', '🌟', '⭐', '💫'];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const egg = document.createElement('div');
+                    egg.className = 'easter-egg';
+                    egg.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    egg.style.left = Math.random() * window.innerWidth + 'px';
+                    egg.style.top = window.innerHeight + 'px';
+                    document.body.appendChild(egg);
+                    setTimeout(() => egg.remove(), 3000);
+                }, i * 100);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !stats.gameActive) {
+                stats.gameActive = true;
+                document.getElementById('word-input').disabled = false;
+                document.getElementById('word-input').focus();
+                nextWord();
+            }
+        });
+
+        document.getElementById('word-input').addEventListener('input', (e) => {
+            if (!stats.gameActive) return;
+
+            const input = e.target.value.trim().toLowerCase();
+            const target = currentWord.toLowerCase();
+
+            // Check easter eggs
+            if (easterEggs[input]) {
+                alert(easterEggs[input]);
+                triggerEasterEgg();
+            }
+
+            if (input === target) {
+                stats.score++;
+                stats.combo++;
+                document.getElementById('score').textContent = stats.score;
+                document.getElementById('combo').textContent = stats.combo;
+
+                // Random effects
+                if (Math.random() > 0.7) {
+                    document.body.style.transform = 'rotate(' + (Math.random() * 10 - 5) + 'deg)';
+                    setTimeout(() => document.body.style.transform = 'rotate(0deg)', 200);
+                }
+
+                nextWord();
+            } else if (!target.startsWith(input)) {
+                stats.combo = 0;
+                document.getElementById('combo').textContent = stats.combo;
+            }
+        });
+    </script>
+</body>
+
+</html>

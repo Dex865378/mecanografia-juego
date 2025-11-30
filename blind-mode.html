@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Ciego</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-container {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .instruction {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 40px;
+        }
+
+        #target-word {
+            font-size: 4rem;
+            margin: 60px 0;
+            color: white;
+            min-height: 100px;
+            transition: opacity 0.5s;
+        }
+
+        #target-word.hidden {
+            opacity: 0;
+        }
+
+        #word-input {
+            font-size: 2rem;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            background: #111;
+            border: 2px solid #333;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        #word-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 40px;
+        }
+
+        .stat-box {
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #888;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #666;
+            color: #666;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            border-color: #aaa;
+            color: #aaa;
+        }
+
+        .countdown {
+            font-size: 2rem;
+            color: #888;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>👁️ MODO CIEGO</h1>
+        <p class="instruction">La palabra se mostrará por 2 segundos, luego desaparecerá.</p>
+
+        <div class="countdown" id="countdown"></div>
+        <div id="target-word">Presiona ENTER para comenzar</div>
+        <input type="text" id="word-input" placeholder="Escribe de memoria..." autocomplete="off" disabled>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div>Palabras</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat-box">
+                <div>Perfectas</div>
+                <div class="stat-value" id="perfect">0</div>
+            </div>
+            <div class="stat-box">
+                <div>Precisión</div>
+                <div class="stat-value" id="accuracy">100%</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px;">
+            <button onclick="location.href='game-modes.html'">🏠 Volver</button>
+            <button onclick="location.reload()">🔄 Reiniciar</button>
+        </div>
+    </div>
+
+    <audio id="correct-sound"></audio>
+    <audio id="wrong-sound"></audio>
+
+    <script>
+        const words = "memoria concentracion enfoque atencion precision exactitud perfeccion maestria habilidad destreza talento capacidad potencial excelencia superioridad dominio control disciplina practica entrenamiento dedicacion esfuerzo voluntad determinacion perseverancia resistencia fortaleza poder fuerza energia impulso motivacion inspiracion creatividad imaginacion vision claridad lucidez consciencia percepcion intuicion sabiduria conocimiento experiencia aprendizaje desarrollo crecimiento evolucion transformacion cambio mejora progreso avance logro exito victoria triunfo gloria honor".split(" ");
+
+        let stats = {
+            score: 0,
+            perfect: 0,
+            total: 0,
+            gameActive: false,
+            viewTime: 2000 // 2 seconds
+        };
+
+        let currentWord = '';
+        let speechSynth = window.speechSynthesis;
+
+        function speakWord(word) {
+            if (speechSynth.speaking) speechSynth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.7;
+            speechSynth.speak(utterance);
+        }
+
+        function playTone(frequency, duration) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function nextWord() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            const wordEl = document.getElementById('target-word');
+            const countdownEl = document.getElementById('countdown');
+
+            // Show word
+            wordEl.textContent = currentWord;
+            wordEl.classList.remove('hidden');
+
+            // Speak word
+            speakWord(currentWord);
+
+            // Countdown
+            let timeLeft = stats.viewTime / 1000;
+            countdownEl.textContent = timeLeft.toFixed(1) + 's';
+
+            const countdownInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                countdownEl.textContent = timeLeft.toFixed(1) + 's';
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    countdownEl.textContent = '';
+                }
+            }, 100);
+
+            // Hide word after viewTime
+            setTimeout(() => {
+                wordEl.classList.add('hidden');
+                document.getElementById('word-input').focus();
+            }, stats.viewTime);
+
+            document.getElementById('word-input').value = '';
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = stats.score;
+            document.getElementById('perfect').textContent = stats.perfect;
+            const accuracy = stats.total > 0 ? Math.round((stats.score / stats.total) * 100) : 100;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !stats.gameActive) {
+                stats.gameActive = true;
+                document.getElementById('word-input').disabled = false;
+                nextWord();
+            }
+        });
+
+        document.getElementById('word-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const input = e.target.value.trim().toLowerCase();
+                const target = currentWord.toLowerCase();
+
+                stats.total++;
+
+                if (input === target) {
+                    stats.score++;
+                    stats.perfect++;
+                    playTone(800, 0.1); // Success tone
+                    document.body.style.backgroundColor = '#001100';
+                    setTimeout(() => document.body.style.backgroundColor = '#000000', 200);
+                } else {
+                    playTone(200, 0.3); // Error tone
+                    document.body.style.backgroundColor = '#110000';
+                    setTimeout(() => document.body.style.backgroundColor = '#000000', 200);
+
+                    // Speak correct word
+                    setTimeout(() => speakWord(currentWord), 500);
+                }
+
+                updateStats();
+                setTimeout(nextWord, 1000);
+            }
+        });
+    </script>
+</body>
+
+</html>
