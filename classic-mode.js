@@ -1,6 +1,4 @@
-// VELOCITY - Classic Mode Logic
-// Updated to use WordBank and Mobile Optimizations
-
+// VELOCITY - Classic Mode Logic with Levels & Power-ups
 // Game State
 let score = 0;
 let time = 5.00;
@@ -14,6 +12,9 @@ let errors = 0;
 let combo = 0;
 let maxCombo = 0;
 let lives = 3;
+let level = 1;
+let wordsUntilNextLevel = 10;
+let powerups = [];
 
 // DOM Elements
 const wordDisplay = document.getElementById('word-display');
@@ -46,16 +47,6 @@ document.addEventListener('click', () => {
     if (isPlaying) wordInput.focus();
 });
 
-function initGame() {
-    showScreen(gameScreen);
-    wordInput.value = '';
-    wordInput.focus();
-    wordDisplay.innerHTML = 'PRESIONA ENTER<br>PARA EMPEZAR';
-    score = 0;
-    time = 5.00;
-    updateHUD();
-}
-
 function startGame() {
     isPlaying = true;
     score = 0;
@@ -65,9 +56,14 @@ function startGame() {
     errors = 0;
     combo = 0;
     lives = 3;
+    level = 1;
+    wordsUntilNextLevel = 10;
+    powerups = [];
     gameStartTime = Date.now();
 
-    bgMusic.volume = 0.3;
+    // Load music volume from settings
+    const musicVol = localStorage.getItem('velocity_music_volume');
+    bgMusic.volume = musicVol ? parseFloat(musicVol) : 0.3;
     bgMusic.play().catch(e => console.log("Audio play failed", e));
 
     nextWord();
@@ -85,7 +81,7 @@ function nextWord() {
     if (typeof WordBank !== 'undefined') {
         currentWord = WordBank.getRandomWord();
     } else {
-        const fallbackWords = ["error", "carga", "palabra", "fallback"];
+        const fallbackWords = ["velocidad", "teclado", "juego", "codigo", "datos"];
         currentWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
     }
 
@@ -110,7 +106,12 @@ function checkInput() {
 
     const input = wordInput.value.trim().toLowerCase();
 
+    // Load SFX volume from settings
+    const sfxVol = localStorage.getItem('velocity_sfx_volume');
+    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
+
     // Play type sound
+    typeSound.volume = volume;
     typeSound.currentTime = 0;
     typeSound.play().catch(() => { });
 
@@ -125,11 +126,24 @@ function checkInput() {
 }
 
 function handleSuccess() {
-    score += 10 + (combo * 2);
+    const timeBonus = Math.floor(time * 10);
+    const comboBonus = combo * 5;
+    score += 10 + timeBonus + comboBonus;
     wordsTyped++;
     charsTyped += currentWord.length;
     combo++;
     if (combo > maxCombo) maxCombo = combo;
+
+    // Check for level up
+    wordsUntilNextLevel--;
+    if (wordsUntilNextLevel <= 0) {
+        levelUp();
+    }
+
+    // Random power-up spawn (10% chance)
+    if (Math.random() < 0.1) {
+        spawnPowerup();
+    }
 
     // Progression XP
     if (typeof Progression !== 'undefined') {
@@ -144,6 +158,10 @@ function handleMiss() {
     lives--;
     combo = 0;
     errors++;
+
+    const sfxVol = localStorage.getItem('velocity_sfx_volume');
+    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
+    errorSound.volume = volume;
     errorSound.play().catch(() => { });
 
     // Shake effect
@@ -157,10 +175,110 @@ function handleMiss() {
     }
 }
 
+function levelUp() {
+    level++;
+    wordsUntilNextLevel = 10 + (level * 2); // Increasing difficulty
+
+    const sfxVol = localStorage.getItem('velocity_sfx_volume');
+    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
+    levelUpSound.volume = volume;
+    levelUpSound.play().catch(() => { });
+
+    // Visual notification
+    showNotification(`🎉 ¡NIVEL ${level}!`, '#00ff88');
+
+    // Bonus points
+    score += level * 50;
+}
+
+function spawnPowerup() {
+    const types = ['⏰', '💎', '🔥', '⚡'];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    powerups.push({
+        type: type,
+        duration: 5000,
+        startTime: Date.now()
+    });
+
+    const sfxVol = localStorage.getItem('velocity_sfx_volume');
+    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
+    powerupSound.volume = volume;
+    powerupSound.play().catch(() => { });
+
+    applyPowerup(type);
+    updatePowerupsDisplay();
+}
+
+function applyPowerup(type) {
+    switch (type) {
+        case '⏰': // Extra time
+            time += 2;
+            showNotification('⏰ +2 Segundos', '#ffd700');
+            break;
+        case '💎': // Double points
+            showNotification('💎 Puntos x2', '#00ffff');
+            setTimeout(() => {
+                score *= 2;
+                updateHUD();
+            }, 100);
+            break;
+        case '🔥': // Combo boost
+            combo += 5;
+            showNotification('🔥 +5 Combo', '#ff6600');
+            break;
+        case '⚡': // Extra life
+            lives++;
+            showNotification('⚡ +1 Vida', '#ff00ff');
+            break;
+    }
+}
+
+function updatePowerupsDisplay() {
+    const container = document.getElementById('powerups');
+    if (!container) return;
+
+    // Remove expired powerups
+    powerups = powerups.filter(p => (Date.now() - p.startTime) < p.duration);
+
+    container.innerHTML = powerups.map(p => `
+        <div class="powerup-icon" style="animation: bounce 0.5s;">
+            ${p.type}
+        </div>
+    `).join('');
+}
+
+function showNotification(text, color) {
+    const notif = document.createElement('div');
+    notif.textContent = text;
+    notif.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: ${color};
+        color: black;
+        padding: 20px 40px;
+        border-radius: 10px;
+        font-size: 2rem;
+        font-weight: bold;
+        z-index: 1000;
+        animation: fadeInOut 2s;
+    `;
+    document.body.appendChild(notif);
+    setTimeout(() => notif.remove(), 2000);
+}
+
 function updateHUD() {
     scoreDisplay.textContent = score;
     timeDisplay.textContent = Math.max(0, time).toFixed(2);
     comboDisplay.textContent = `Combo: ${combo}x`;
+
+    // Update level and lives
+    const levelDisplay = document.getElementById('level-display');
+    const livesDisplay = document.getElementById('lives-display');
+    if (levelDisplay) levelDisplay.textContent = level;
+    if (livesDisplay) livesDisplay.textContent = lives;
 
     // WPM Calculation
     const elapsedMin = (Date.now() - gameStartTime) / 60000;
@@ -176,6 +294,9 @@ function updateHUD() {
     } else {
         progressFill.style.background = 'linear-gradient(90deg, #b026ff, #00ff88)';
     }
+
+    // Update powerups
+    updatePowerupsDisplay();
 }
 
 function endGame() {
@@ -205,32 +326,32 @@ function endGame() {
     }
 }
 
-function showScreen(screen) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    screen.classList.add('active');
-}
-
-// Shake animation style
+// Add CSS animations
 const style = document.createElement('style');
 style.innerHTML = `
     @keyframes shake {
-        0% { transform: translate(1px, 1px) rotate(0deg); }
-        10% { transform: translate(-1px, -2px) rotate(-1deg); }
-        20% { transform: translate(-3px, 0px) rotate(1deg); }
-        30% { transform: translate(3px, 2px) rotate(0deg); }
-        40% { transform: translate(1px, -1px) rotate(1deg); }
-        50% { transform: translate(-1px, 2px) rotate(-1deg); }
-        60% { transform: translate(-3px, 1px) rotate(0deg); }
-        70% { transform: translate(3px, 1px) rotate(-1deg); }
-        80% { transform: translate(-1px, -1px) rotate(1deg); }
-        90% { transform: translate(1px, 2px) rotate(0deg); }
-        100% { transform: translate(1px, -2px) rotate(-1deg); }
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: translateX(10px); }
     }
     .shake {
         animation: shake 0.5s;
     }
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .powerup-icon {
+        font-size: 2rem;
+        display: inline-block;
+        margin: 5px;
+    }
 `;
 document.head.appendChild(style);
 
-// Start immediately if requested
-initGame();
+// Start game on load
+wordInput.focus();

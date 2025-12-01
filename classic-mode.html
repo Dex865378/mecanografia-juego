@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VELOCITY - Modo Clásico</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -39,7 +41,9 @@
             margin-bottom: 30px;
         }
 
-        .score-box, .timer-box, .wpm-box {
+        .score-box,
+        .timer-box,
+        .wpm-box {
             background: rgba(255, 255, 255, 0.05);
             border: 2px solid rgba(0, 255, 136, 0.3);
             border-radius: 15px;
@@ -228,7 +232,13 @@
             <div class="word-display" id="word-display">PRESIONA ENTER<br>PARA EMPEZAR</div>
             <input type="text" class="word-input" id="word-input" autocomplete="off" spellcheck="false" autofocus>
 
+            <div id="powerups"
+                style="display: flex; justify-content: center; gap: 10px; margin: 20px 0; min-height: 50px;"></div>
+
             <div class="combo-counter" id="combo-display">Combo: 0x</div>
+            <div style="text-align: center; margin: 10px 0; color: #ffd700; font-size: 1.2rem;">
+                Nivel: <span id="level-display">1</span> | Vidas: <span id="lives-display">3</span>
+            </div>
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
@@ -253,9 +263,27 @@
                 </div>
             </div>
             <button class="restart-btn" onclick="location.reload()">JUGAR DE NUEVO</button>
-            <button class="restart-btn" onclick="location.href='index.html'" style="background: transparent; border: 2px solid #00ff88; color: #00ff88;">MENÚ PRINCIPAL</button>
+            <button class="restart-btn" onclick="location.href='index.html'"
+                style="background: transparent; border: 2px solid #00ff88; color: #00ff88;">MENÚ PRINCIPAL</button>
         </div>
     </div>
+
+    <!-- Audio Elements -->
+    <audio id="bg-music" loop>
+        <source src="https://opengameart.org/sites/default/files/Cyberpunk%20Moonlight%20Sonata.mp3" type="audio/mp3">
+    </audio>
+    <audio id="type-sound">
+        <source src="https://opengameart.org/sites/default/files/click_0.wav" type="audio/wav">
+    </audio>
+    <audio id="error-sound">
+        <source src="https://opengameart.org/sites/default/files/error_0.wav" type="audio/wav">
+    </audio>
+    <audio id="powerup-sound">
+        <source src="https://opengameart.org/sites/default/files/powerup.wav" type="audio/wav">
+    </audio>
+    <audio id="level-up-sound">
+        <source src="https://opengameart.org/sites/default/files/levelup.wav" type="audio/wav">
+    </audio>
 
     <script src="words.js"></script>
     <script src="progression.js"></script>
