@@ -47,7 +47,7 @@
             margin: 60px 0;
             color: white;
             min-height: 100px;
-            transition: opacity 0.5s;
+            transition: opacity 0.2s;
         }
 
         #target-word.hidden {
@@ -116,7 +116,7 @@
 <body>
     <div class="game-container">
         <h1>👁️ MODO CIEGO</h1>
-        <p class="instruction">La palabra se mostrará por 2 segundos, luego desaparecerá.</p>
+        <p class="instruction">La palabra se mostrará por 0.5 segundos, luego desaparecerá.</p>
 
         <div class="countdown" id="countdown"></div>
         <div id="target-word">Presiona ENTER para comenzar</div>
@@ -143,18 +143,22 @@
         </div>
     </div>
 
-    <audio id="correct-sound"></audio>
-    <audio id="wrong-sound"></audio>
-
+    <script src="words.js"></script>
     <script>
-        const words = "memoria concentracion enfoque atencion precision exactitud perfeccion maestria habilidad destreza talento capacidad potencial excelencia superioridad dominio control disciplina practica entrenamiento dedicacion esfuerzo voluntad determinacion perseverancia resistencia fortaleza poder fuerza energia impulso motivacion inspiracion creatividad imaginacion vision claridad lucidez consciencia percepcion intuicion sabiduria conocimiento experiencia aprendizaje desarrollo crecimiento evolucion transformacion cambio mejora progreso avance logro exito victoria triunfo gloria honor".split(" ");
+        // Use WordBank if available, otherwise fallback
+        let words;
+        if (typeof WordBank !== 'undefined') {
+            words = WordBank.common;
+        } else {
+            words = "memoria concentracion enfoque atencion precision exactitud perfeccion maestria habilidad destreza talento capacidad potencial excelencia superioridad dominio control disciplina practica entrenamiento dedicacion esfuerzo voluntad determinacion perseverancia resistencia fortaleza poder fuerza energia impulso motivacion inspiracion creatividad imaginacion vision claridad lucidez consciencia percepcion intuicion sabiduria conocimiento experiencia aprendizaje desarrollo crecimiento evolucion transformacion cambio mejora progreso avance logro exito victoria triunfo gloria honor".split(" ");
+        }
 
         let stats = {
             score: 0,
             perfect: 0,
             total: 0,
             gameActive: false,
-            viewTime: 2000 // 2 seconds
+            viewTime: 500 // 0.5 seconds
         };
 
         let currentWord = '';
