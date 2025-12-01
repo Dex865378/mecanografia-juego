@@ -29,7 +29,6 @@ const progressFill = document.getElementById('progress-fill');
 const gameScreen = document.getElementById('game-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 const difficultyScreen = document.getElementById('difficulty-screen');
-const gameHud = document.getElementById('game-hud');
 const checkpointModal = document.getElementById('checkpoint-modal');
 
 // Audio
@@ -41,11 +40,10 @@ const levelUpSound = document.getElementById('level-up-sound');
 
 // Init
 wordInput.addEventListener('input', checkInput);
-// Removed Enter key listener to prevent accidental starts
 
 // Auto-focus input on click anywhere
 document.addEventListener('click', () => {
-    if (isPlaying && !checkpointModal.style.display === 'flex') wordInput.focus();
+    if (isPlaying && checkpointModal.style.display !== 'flex') wordInput.focus();
 });
 
 function selectDifficulty(diff) {
@@ -71,8 +69,10 @@ function selectDifficulty(diff) {
             break;
     }
 
-    difficultyScreen.style.display = 'none';
-    gameHud.style.display = 'flex';
+    // Hide difficulty screen and show game screen
+    difficultyScreen.classList.remove('active');
+    gameScreen.classList.add('active');
+
     startGame();
 }
 
@@ -100,8 +100,8 @@ function startGame() {
     wordInput.value = '';
     wordInput.focus();
 
-    document.getElementById('game-over-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'flex';
+    gameOverScreen.classList.remove('active');
+    gameScreen.classList.add('active');
     updateHUD();
 }
 
@@ -306,9 +306,8 @@ function endGame() {
     clearInterval(timerInterval);
     bgMusic.pause();
 
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('game-hud').style.display = 'none';
-    document.getElementById('game-over-screen').style.display = 'flex';
+    gameScreen.classList.remove('active');
+    gameOverScreen.classList.add('active');
 
     document.getElementById('final-score').textContent = score;
     document.getElementById('final-words').textContent = wordsTyped;
