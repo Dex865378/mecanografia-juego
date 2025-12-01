@@ -1,455 +1,236 @@
-// ===== VELOCITY - Classic Mode =====
-let gameState = {
-    isPlaying: false,
-    difficulty: 'medium',
-    score: 0,
-    combo: 1,
-    level: 1,
-    lives: 3,
-    currentWord: '',
-    timeLeft: 5,
-    timerInterval: null,
-    wordsTyped: 0,
-    correctWords: 0,
-    totalChars: 0,
-    correctChars: 0,
-    startTime: null,
-    streak: 0,
-    bestStreak: 0
-};
+// VELOCITY - Classic Mode Logic
+// Updated to use WordBank and Mobile Optimizations
 
-const wordLists = {
-    easy: [
-        'casa', 'gato', 'sol', 'mar', 'luz', 'pan', 'rio', 'flor', 'luna', 'nube',
-        'mesa', 'silla', 'agua', 'fuego', 'aire', 'tierra', 'arbol', 'hoja', 'rojo', 'azul',
-        'verde', 'gris', 'pelo', 'ojo', 'boca', 'mano', 'pie', 'dedo', 'uña', 'piel',
-        'perro', 'pez', 'ave', 'oso', 'lobo', 'leon', 'tigre', 'mono', 'pato', 'pollo',
-        'vaca', 'toro', 'cerdo', 'oveja', 'cabra', 'mula', 'raton', 'queso', 'leche', 'huevo',
-        'sal', 'miel', 'uva', 'pera', 'piña', 'coco', 'lima', 'nuez', 'boda', 'cine',
-        'foto', 'libro', 'lapiz', 'papel', 'carta', 'sobre', 'sello', 'caja', 'bolsa', 'saco',
-        'ropa', 'tela', 'hilo', 'lana', 'seda', 'cuero', 'bota', 'zapato', 'gorra', 'gafas',
-        'reloj', 'anillo', 'joya', 'oro', 'plata', 'cobre', 'hierro', 'acero', 'zinc', 'gas',
-        'ola', 'rio', 'lago', 'pozo', 'lluvia', 'nieve', 'hielo', 'frio', 'calor', 'viento'
-    ],
-    medium: [
-        'velocidad', 'teclado', 'pantalla', 'programar', 'desarrollo', 'tecnologia',
-        'computadora', 'internet', 'servidor', 'navegador', 'aplicacion', 'sistema',
-        'memoria', 'procesador', 'graficos', 'sonido', 'video', 'imagen', 'archivo',
-        'carpeta', 'documento', 'escritorio', 'ventana', 'menu', 'boton', 'enlace',
-        'pagina', 'sitio', 'dominio', 'hosting', 'nube', 'datos', 'informacion',
-        'usuario', 'contraseña', 'seguridad', 'privacidad', 'redes', 'sociales',
-        'mensaje', 'correo', 'chat', 'llamada', 'camara', 'microfono', 'altavoz',
-        'auricular', 'bateria', 'cargador', 'cable', 'puerto', 'conexion', 'wifi',
-        'bluetooth', 'movil', 'tablet', 'laptop', 'consola', 'juego', 'jugador',
-        'nivel', 'puntos', 'vidas', 'tiempo', 'record', 'victoria', 'derrota',
-        'amigo', 'equipo', 'grupo', 'comunidad', 'foro', 'blog', 'articulo',
-        'noticia', 'evento', 'calendario', 'agenda', 'tarea', 'proyecto', 'trabajo',
-        'oficina', 'escuela', 'clase', 'curso', 'examen', 'nota', 'titulo',
-        'grado', 'master', 'doctorado', 'carrera', 'profesion', 'empleo', 'sueldo'
-    ],
-    hard: [
-        'extraordinario', 'magnifico', 'espectacular', 'impresionante', 'revolucionario',
-        'arquitectura', 'infraestructura', 'telecomunicaciones', 'bioingenieria', 'nanotecnologia',
-        'inteligencia', 'artificial', 'aprendizaje', 'automatico', 'algoritmo', 'criptografia',
-        'ciberseguridad', 'vulnerabilidad', 'autenticacion', 'autorizacion', 'administracion',
-        'configuracion', 'personalizacion', 'optimizacion', 'rendimiento', 'escalabilidad',
-        'disponibilidad', 'confiabilidad', 'mantenibilidad', 'interoperabilidad', 'compatibilidad',
-        'accesibilidad', 'usabilidad', 'experiencia', 'interfaz', 'visualizacion', 'representacion',
-        'interpretacion', 'compilacion', 'ejecucion', 'depuracion', 'implementacion', 'integracion',
-        'despliegue', 'distribucion', 'versionamiento', 'repositorio', 'colaboracion', 'contribucion',
-        'documentacion', 'especificacion', 'requerimiento', 'analisis', 'diseño', 'evaluacion',
-        'investigacion', 'experimentacion', 'descubrimiento', 'innovacion', 'creatividad',
-        'imaginacion', 'inspiracion', 'motivacion', 'dedicacion', 'perseverancia', 'resiliencia',
-        'adaptabilidad', 'flexibilidad', 'agilidad', 'eficiencia', 'efectividad', 'productividad',
-        'competitividad', 'estrategia', 'planificacion', 'organizacion', 'coordinacion', 'direccion'
-    ],
-    expert: [
-        'asynchronous', 'polymorphism', 'encapsulation', 'inheritance', 'abstraction',
-        'multithreading', 'concurrency', 'parallelism', 'synchronization', 'deadlock',
-        'racecondition', 'memoryleak', 'garbagecollection', 'segmentationfault', 'stackoverflow',
-        'bufferoverflow', 'sqlinjection', 'crosssitescripting', 'maninthemiddle', 'denialofservice',
-        'distributed', 'decentralized', 'blockchain', 'cryptocurrency', 'smartcontract',
-        'microservices', 'containerization', 'orchestration', 'virtualization', 'serverless',
-        'functionasaservice', 'infrastructureascode', 'continuousintegration', 'continuousdelivery',
-        'devops', 'agilemethodology', 'scrumframework', 'kanbanboard', 'testdrivendevelopment',
-        'behaviordrivendevelopment', 'domaindrivendesign', 'objectorientedprogramming',
-        'functionalprogramming', 'reactiveprogramming', 'imperativeprogramming', 'declarativeprogramming',
-        'metaprogramming', 'reflection', 'introspection', 'dependencyinjection', 'inversionofcontrol',
-        'designpatterns', 'singleton', 'factory', 'observer', 'strategy', 'decorator', 'adapter',
-        'facade', 'proxy', 'command', 'iterator', 'composite', 'state', 'template', 'visitor'
-    ]
-};
+// Game State
+let score = 0;
+let time = 5.00;
+let isPlaying = false;
+let currentWord = '';
+let timerInterval;
+let gameStartTime;
+let wordsTyped = 0;
+let charsTyped = 0;
+let errors = 0;
+let combo = 0;
+let maxCombo = 0;
+let lives = 3;
 
-// Control de palabras usadas para evitar repeticiones inmediatas
-let usedWords = {
-    easy: new Set(),
-    medium: new Set(),
-    hard: new Set(),
-    expert: new Set()
-};
+// DOM Elements
+const wordDisplay = document.getElementById('word-display');
+const wordInput = document.getElementById('word-input');
+const timeDisplay = document.getElementById('time');
+const scoreDisplay = document.getElementById('score');
+const wpmDisplay = document.getElementById('wpm');
+const comboDisplay = document.getElementById('combo-display');
+const progressFill = document.getElementById('progress-fill');
+const gameScreen = document.getElementById('game-screen');
+const gameOverScreen = document.getElementById('game-over-screen');
 
-function getUniqueWord(difficulty) {
-    const list = wordLists[difficulty];
-    const used = usedWords[difficulty];
+// Audio
+const bgMusic = document.getElementById('bg-music');
+const typeSound = document.getElementById('type-sound');
+const errorSound = document.getElementById('error-sound');
+const powerupSound = document.getElementById('powerup-sound');
+const levelUpSound = document.getElementById('level-up-sound');
 
-    // Si ya usamos todas las palabras, reiniciamos el historial
-    if (used.size >= list.length) {
-        used.clear();
+// Init
+wordInput.addEventListener('input', checkInput);
+wordInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !isPlaying && gameOverScreen.style.display !== 'flex') {
+        startGame();
     }
-
-    let word;
-    let attempts = 0;
-    do {
-        word = list[Math.floor(Math.random() * list.length)];
-        attempts++;
-    } while (used.has(word) && attempts < 50); // Evitar bucle infinito
-
-    used.add(word);
-    return word;
-}
-
-let stats = { totalGames: 0, highScore: 0, totalWords: 0, bestWPM: 0, avgAccuracy: 0, longestStreak: 0 };
-
-const musicTracks = [
-    document.getElementById('bgMusic1'),
-    document.getElementById('bgMusic2'),
-    document.getElementById('bgMusic3'),
-    document.getElementById('bgMusic4')
-];
-let currentMusic = null;
-
-const elements = {
-    startBtn: document.getElementById('startBtn'),
-    statsBtn: document.getElementById('statsBtn'),
-    diffBtns: document.querySelectorAll('.diff-btn'),
-    score: document.getElementById('score'),
-    combo: document.getElementById('combo'),
-    level: document.getElementById('level'),
-    lives: document.getElementById('lives'),
-    timerBar: document.getElementById('timerBar'),
-    timerText: document.getElementById('timerText'),
-    targetWord: document.getElementById('targetWord'),
-    wordInput: document.getElementById('wordInput'),
-    feedback: document.getElementById('feedback'),
-    wpm: document.getElementById('wpm'),
-    accuracy: document.getElementById('accuracy'),
-    streak: document.getElementById('streak'),
-    correctSound: document.getElementById('correctSound'),
-    wrongSound: document.getElementById('wrongSound'),
-    gameOverSound: document.getElementById('gameOverSound'),
-    tickSound: document.getElementById('tickSound'),
-    levelupSound: document.getElementById('levelupSound'),
-    musicToggle: document.getElementById('musicToggle'),
-    themeToggle: document.getElementById('themeToggle')
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadStats();
-    setupEventListeners();
-    startMusic();
 });
 
-function startMusic() {
-    currentMusic = musicTracks[0];
-    currentMusic.volume = 0.3;
-    currentMusic.play().catch(() => { });
-}
+// Auto-focus input on click anywhere
+document.addEventListener('click', () => {
+    if (isPlaying) wordInput.focus();
+});
 
-function setupEventListeners() {
-    elements.startBtn.addEventListener('click', startGame);
-    elements.wordInput.addEventListener('input', checkWord);
-
-    elements.diffBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            elements.diffBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            gameState.difficulty = btn.dataset.level;
-        });
-    });
-
-    document.getElementById('retryBtn').addEventListener('click', startGame);
-    document.getElementById('menuBtn').addEventListener('click', () => showScreen('mainMenu'));
-    elements.statsBtn.addEventListener('click', showStats);
-    document.getElementById('closeStatsBtn').addEventListener('click', () => showScreen('mainMenu'));
-
-    elements.musicToggle.addEventListener('click', () => {
-        if (currentMusic.paused) {
-            currentMusic.play();
-            elements.musicToggle.textContent = '🔊';
-        } else {
-            currentMusic.pause();
-            elements.musicToggle.textContent = '🔇';
-        }
-    });
-
-    elements.themeToggle.addEventListener('click', () => {
-        const body = document.body;
-        const currentTheme = body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        body.setAttribute('data-theme', newTheme);
-        elements.themeToggle.textContent = newTheme === 'light' ? '☀️' : '🌙';
-    });
+function initGame() {
+    showScreen(gameScreen);
+    wordInput.value = '';
+    wordInput.focus();
+    wordDisplay.innerHTML = 'PRESIONA ENTER<br>PARA EMPEZAR';
+    score = 0;
+    time = 5.00;
+    updateHUD();
 }
 
 function startGame() {
-    gameState = {
-        ...gameState,
-        isPlaying: true,
-        score: 0,
-        combo: 1,
-        level: 1,
-        lives: 3,
-        timeLeft: 5,
-        wordsTyped: 0,
-        correctWords: 0,
-        totalChars: 0,
-        correctChars: 0,
-        startTime: Date.now(),
-        streak: 0,
-        bestStreak: 0
-    };
+    isPlaying = true;
+    score = 0;
+    time = 5.00;
+    wordsTyped = 0;
+    charsTyped = 0;
+    errors = 0;
+    combo = 0;
+    lives = 3;
+    gameStartTime = Date.now();
 
-    showScreen('game');
+    bgMusic.volume = 0.3;
+    bgMusic.play().catch(e => console.log("Audio play failed", e));
+
     nextWord();
-    startTimer();
-    updateUI();
-    elements.wordInput.focus();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 10);
+    wordInput.value = '';
+    wordInput.focus();
 
-    if (currentMusic) {
-        currentMusic.currentTime = 0;
-        currentMusic.volume = 0.3;
-    }
+    document.getElementById('game-over-screen').style.display = 'none';
+    document.getElementById('game-screen').style.display = 'flex';
 }
 
 function nextWord() {
-    gameState.currentWord = getUniqueWord(gameState.difficulty);
-    elements.targetWord.textContent = gameState.currentWord;
-    elements.wordInput.value = '';
-    elements.feedback.textContent = '';
-    elements.feedback.className = 'feedback';
-    gameState.timeLeft = 5;
-    updateTimer();
-}
-
-function startTimer() {
-    if (gameState.timerInterval) clearInterval(gameState.timerInterval);
-
-    gameState.timerInterval = setInterval(() => {
-        gameState.timeLeft -= 0.1;
-
-        if (gameState.timeLeft <= 0) {
-            loseLife();
-        } else {
-            updateTimer();
-
-            if (gameState.timeLeft <= 2) {
-                elements.timerBar.classList.add('warning');
-                document.body.classList.add('danger');
-                if (gameState.timeLeft % 1 < 0.1) playSound('tick');
-            } else {
-                elements.timerBar.classList.remove('warning');
-                document.body.classList.remove('danger');
-            }
-        }
-    }, 100);
-}
-
-function checkWord() {
-    const input = elements.wordInput.value.toLowerCase();
-    const target = gameState.currentWord.toLowerCase();
-
-    if (input === target) {
-        correctWord();
-    }
-}
-
-function correctWord() {
-    playSound('correct');
-
-    gameState.wordsTyped++;
-    gameState.correctWords++;
-    gameState.totalChars += gameState.currentWord.length;
-    gameState.correctChars += gameState.currentWord.length;
-    gameState.streak++;
-
-    if (gameState.streak > gameState.bestStreak) {
-        gameState.bestStreak = gameState.streak;
-    }
-
-    const timeBonus = Math.floor(gameState.timeLeft * 10);
-    const comboBonus = gameState.combo;
-    const points = (100 + timeBonus) * comboBonus;
-
-    gameState.score += points;
-
-    if (gameState.timeLeft > 3) {
-        gameState.combo = Math.min(gameState.combo + 1, 10);
-    }
-
-    if (gameState.correctWords % 10 === 0) {
-        gameState.level++;
-        playSound('levelup');
-        showFeedback(`¡NIVEL ${gameState.level}!`, 'correct');
-        adjustMusicIntensity();
+    // Use WordBank if available, otherwise fallback
+    if (typeof WordBank !== 'undefined') {
+        currentWord = WordBank.getRandomWord();
     } else {
-        showFeedback(`+${points} pts`, 'correct');
+        const fallbackWords = ["error", "carga", "palabra", "fallback"];
+        currentWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
     }
 
-    elements.wordInput.classList.add('correct');
-    setTimeout(() => elements.wordInput.classList.remove('correct'), 300);
+    wordDisplay.textContent = currentWord;
+    wordInput.value = '';
+    time = 5.00; // Reset time per word
+    updateHUD();
+}
 
-    updateUI();
+function updateTimer() {
+    if (!isPlaying) return;
+
+    time -= 0.01;
+    if (time <= 0) {
+        handleMiss();
+    }
+    updateHUD();
+}
+
+function checkInput() {
+    if (!isPlaying) return;
+
+    const input = wordInput.value.trim().toLowerCase();
+
+    // Play type sound
+    typeSound.currentTime = 0;
+    typeSound.play().catch(() => { });
+
+    if (input === currentWord) {
+        handleSuccess();
+    } else if (!currentWord.startsWith(input)) {
+        // Visual feedback for wrong char
+        wordInput.style.color = 'red';
+    } else {
+        wordInput.style.color = 'white';
+    }
+}
+
+function handleSuccess() {
+    score += 10 + (combo * 2);
+    wordsTyped++;
+    charsTyped += currentWord.length;
+    combo++;
+    if (combo > maxCombo) maxCombo = combo;
+
+    // Progression XP
+    if (typeof Progression !== 'undefined') {
+        Progression.addXP(5);
+        Progression.addCoins(1);
+    }
+
     nextWord();
 }
 
-function loseLife() {
-    playSound('wrong');
+function handleMiss() {
+    lives--;
+    combo = 0;
+    errors++;
+    errorSound.play().catch(() => { });
 
-    gameState.lives--;
-    gameState.combo = 1;
-    gameState.streak = 0;
-
+    // Shake effect
     document.body.classList.add('shake');
     setTimeout(() => document.body.classList.remove('shake'), 500);
 
-    elements.wordInput.classList.add('wrong');
-    setTimeout(() => elements.wordInput.classList.remove('wrong'), 300);
-
-    showFeedback('TIEMPO AGOTADO!', 'wrong');
-
-    if (gameState.lives <= 0) {
-        gameOver();
+    if (lives <= 0) {
+        endGame();
     } else {
-        updateUI();
         nextWord();
     }
 }
 
-function updateUI() {
-    elements.score.textContent = gameState.score;
-    elements.combo.textContent = `x${gameState.combo}`;
-    elements.level.textContent = gameState.level;
-    elements.lives.textContent = '❤️'.repeat(gameState.lives);
+function updateHUD() {
+    scoreDisplay.textContent = score;
+    timeDisplay.textContent = Math.max(0, time).toFixed(2);
+    comboDisplay.textContent = `Combo: ${combo}x`;
 
-    const minutes = (Date.now() - gameState.startTime) / 60000;
-    const wpm = Math.floor(gameState.correctWords / minutes) || 0;
-    elements.wpm.textContent = wpm;
+    // WPM Calculation
+    const elapsedMin = (Date.now() - gameStartTime) / 60000;
+    const wpm = Math.round((charsTyped / 5) / elapsedMin) || 0;
+    wpmDisplay.textContent = wpm;
 
-    const accuracy = gameState.totalChars > 0
-        ? Math.floor((gameState.correctChars / gameState.totalChars) * 100)
-        : 100;
-    elements.accuracy.textContent = `${accuracy}%`;
+    // Progress bar (time)
+    const progress = (time / 5.00) * 100;
+    progressFill.style.width = `${progress}%`;
 
-    elements.streak.textContent = gameState.streak;
-}
-
-function updateTimer() {
-    const percentage = (gameState.timeLeft / 5) * 100;
-    elements.timerBar.style.width = `${percentage}%`;
-    elements.timerText.textContent = `${gameState.timeLeft.toFixed(1)}s`;
-}
-
-function showFeedback(text, type) {
-    elements.feedback.textContent = text;
-    elements.feedback.className = `feedback ${type}`;
-}
-
-function gameOver() {
-    gameState.isPlaying = false;
-    clearInterval(gameState.timerInterval);
-    document.body.classList.remove('danger');
-
-    playSound('gameOver');
-
-    const minutes = (Date.now() - gameState.startTime) / 60000;
-    const finalWPM = Math.floor(gameState.correctWords / minutes) || 0;
-    const finalAccuracy = gameState.totalChars > 0
-        ? Math.floor((gameState.correctChars / gameState.totalChars) * 100)
-        : 0;
-
-    document.getElementById('finalScore').textContent = gameState.score;
-    document.getElementById('finalWords').textContent = gameState.correctWords;
-    document.getElementById('finalWPM').textContent = finalWPM;
-    document.getElementById('finalAccuracy').textContent = `${finalAccuracy}%`;
-    document.getElementById('finalStreak').textContent = gameState.bestStreak;
-
-    const isNewRecord = gameState.score > stats.highScore;
-    document.getElementById('newRecord').style.display = isNewRecord ? 'block' : 'none';
-
-    stats.totalGames++;
-    stats.highScore = Math.max(stats.highScore, gameState.score);
-    stats.totalWords += gameState.correctWords;
-    stats.bestWPM = Math.max(stats.bestWPM, finalWPM);
-    stats.longestStreak = Math.max(stats.longestStreak, gameState.bestStreak);
-    stats.avgAccuracy = Math.floor(
-        ((stats.avgAccuracy * (stats.totalGames - 1)) + finalAccuracy) / stats.totalGames
-    );
-
-    saveStats();
-    showScreen('gameOver');
-}
-
-function showScreen(screenName) {
-    const screens = {
-        mainMenu: document.getElementById('mainMenu'),
-        game: document.getElementById('gameScreen'),
-        gameOver: document.getElementById('gameOverScreen'),
-        stats: document.getElementById('statsScreen')
-    };
-
-    Object.values(screens).forEach(s => s.style.display = 'none');
-    screens[screenName].style.display = 'block';
-}
-
-function showStats() {
-    document.getElementById('totalGames').textContent = stats.totalGames;
-    document.getElementById('highScore').textContent = stats.highScore;
-    document.getElementById('totalWords').textContent = stats.totalWords;
-    document.getElementById('bestWPM').textContent = stats.bestWPM;
-    document.getElementById('avgAccuracy').textContent = `${stats.avgAccuracy}%`;
-    document.getElementById('longestStreak').textContent = stats.longestStreak;
-
-    showScreen('stats');
-}
-
-function adjustMusicIntensity() {
-    if (!currentMusic) return;
-    const progress = gameState.correctWords / 50;
-    const newVolume = Math.min(0.3 + (progress * 0.3), 0.6);
-    currentMusic.volume = newVolume;
-
-    if (gameState.level % 10 === 0 && gameState.level > 0) {
-        switchMusicTrack();
+    if (time < 2) {
+        progressFill.style.background = 'red';
+    } else {
+        progressFill.style.background = 'linear-gradient(90deg, #b026ff, #00ff88)';
     }
 }
 
-function switchMusicTrack() {
-    if (currentMusic) {
-        currentMusic.pause();
-        currentMusic.currentTime = 0;
+function endGame() {
+    isPlaying = false;
+    clearInterval(timerInterval);
+    bgMusic.pause();
+
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('game-over-screen').style.display = 'flex';
+
+    // Final Stats
+    document.getElementById('final-score').textContent = score;
+    document.getElementById('final-words').textContent = wordsTyped;
+
+    const elapsedMin = (Date.now() - gameStartTime) / 60000;
+    const wpm = Math.round((charsTyped / 5) / elapsedMin) || 0;
+    document.getElementById('final-wpm').textContent = wpm;
+
+    const accuracy = Math.round(((charsTyped - errors) / charsTyped) * 100) || 0;
+    document.getElementById('final-accuracy').textContent = `${accuracy}%`;
+
+    // Save to Progression
+    if (typeof Progression !== 'undefined') {
+        Progression.addXP(score);
+        if (score > 1000) Progression.unlockAchievement('first_win');
+        if (wpm > 60) Progression.unlockAchievement('speed_demon');
     }
-
-    const trackIndex = Math.floor(gameState.level / 10) % 4;
-    currentMusic = musicTracks[trackIndex];
-    currentMusic.volume = 0.3;
-    currentMusic.play().catch(() => { });
 }
 
-function playSound(type) {
-    const sound = elements[`${type}Sound`];
-    if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(() => { });
+function showScreen(screen) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    screen.classList.add('active');
+}
+
+// Shake animation style
+const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
     }
-}
-
-function loadStats() {
-    const saved = localStorage.getItem('velocityStats');
-    if (saved) {
-        stats = JSON.parse(saved);
+    .shake {
+        animation: shake 0.5s;
     }
-}
+`;
+document.head.appendChild(style);
 
-function saveStats() {
-    localStorage.setItem('velocityStats', JSON.stringify(stats));
-}
+// Start immediately if requested
+initGame();

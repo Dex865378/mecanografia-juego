@@ -3,153 +3,134 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VELOCITY - Modo Clásico</title>
     <link rel="stylesheet" href="styles.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap"
         rel="stylesheet">
+    <style>
+        /* Mobile Background Fix */
+        .mobile-bg-fix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            z-index: -100;
+        }
+
+        /* Ensure container fits mobile */
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* Adjust input for mobile */
+        .word-input {
+            font-size: 1.5rem;
+            width: 90%;
+        }
+
+        @media (max-width: 768px) {
+            .word-display {
+                font-size: 2.5rem;
+            }
+
+            .hud {
+                width: 100%;
+                justify-content: space-around;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Audio -->
-    <audio id="bgMusic1" loop>
-        <source src="https://assets.mixkit.co/active_storage/sfx/2745/2745-preview.mp3">
-    </audio>
-    <audio id="bgMusic2" loop>
-        <source src="https://assets.mixkit.co/active_storage/sfx/2492/2492-preview.mp3">
-    </audio>
-    <audio id="bgMusic3" loop>
-        <source src="https://assets.mixkit.co/active_storage/sfx/2743/2743-preview.mp3">
-    </audio>
-    <audio id="bgMusic4" loop>
-        <source src="https://assets.mixkit.co/active_storage/sfx/2487/2487-preview.mp3">
-    </audio>
-    <audio id="correctSound" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3"></audio>
-    <audio id="wrongSound" src="https://assets.mixkit.co/active_storage/sfx/2955/2955-preview.mp3"></audio>
-    <audio id="gameOverSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-    <audio id="tickSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
-    <audio id="powerupSound" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
-    <audio id="levelupSound" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
+    <div class="mobile-bg-fix"></div>
+    <div class="game-container">
+        <!-- Audio Elements -->
+        <audio id="bg-music" loop>
+            <source src="https://opengameart.org/sites/default/files/Cyberpunk%20Moonlight%20Sonata.mp3"
+                type="audio/mp3">
+        </audio>
+        <audio id="type-sound">
+            <source src="https://opengameart.org/sites/default/files/click_0.wav" type="audio/wav">
+        </audio>
+        <audio id="error-sound">
+            <source src="https://opengameart.org/sites/default/files/error_0.wav" type="audio/wav">
+        </audio>
+        <audio id="powerup-sound">
+            <source src="https://opengameart.org/sites/default/files/powerup.wav" type="audio/wav">
+        </audio>
+        <audio id="level-up-sound">
+            <source src="https://opengameart.org/sites/default/files/levelup.wav" type="audio/wav">
+        </audio>
 
-    <div class="container">
-        <header>
-            <h1 class="logo">VELOCITY</h1>
-            <div class="controls">
-                <button id="musicToggle" class="icon-btn">🔊</button>
-                <button id="themeToggle" class="icon-btn">🌙</button>
-                <button onclick="window.location.href='index.html'" class="icon-btn">🏠</button>
+        <!-- HUD -->
+        <div class="hud">
+            <div class="score-box">
+                <div class="label">PUNTUACIÓN</div>
+                <div class="value" id="score">0</div>
             </div>
-        </header>
-
-        <!-- Main Menu -->
-        <div id="mainMenu" class="screen">
-            <div class="menu-content">
-                <h2 class="title">MODO CLÁSICO</h2>
-                <p class="subtitle">Escribe cada palabra en menos de 5 segundos o GAME OVER</p>
-                <div class="difficulty-selector">
-                    <h3>Selecciona Dificultad</h3>
-                    <div class="difficulty-buttons">
-                        <button class="diff-btn" data-level="easy"><span
-                                class="icon">🟢</span><span>FÁCIL</span><small>Palabras cortas</small></button>
-                        <button class="diff-btn active" data-level="medium"><span
-                                class="icon">🟡</span><span>MEDIO</span><small>Palabras normales</small></button>
-                        <button class="diff-btn" data-level="hard"><span
-                                class="icon">🔴</span><span>DIFÍCIL</span><small>Palabras largas</small></button>
-                        <button class="diff-btn" data-level="expert"><span
-                                class="icon">💀</span><span>EXPERTO</span><small>Palabras técnicas</small></button>
-                    </div>
-                </div>
-                <button id="startBtn" class="main-btn">INICIAR JUEGO</button>
-                <button id="statsBtn" class="secondary-btn">📊 ESTADÍSTICAS</button>
+            <div class="timer-box">
+                <div class="label">TIEMPO</div>
+                <div class="value" id="time">5.00</div>
+            </div>
+            <div class="wpm-box">
+                <div class="label">WPM</div>
+                <div class="value" id="wpm">0</div>
             </div>
         </div>
 
         <!-- Game Screen -->
-        <div id="gameScreen" class="screen" style="display:none;">
-            <div class="hud">
-                <div class="hud-item"><span class="label">PUNTOS</span><span id="score" class="value">0</span></div>
-                <div class="hud-item"><span class="label">COMBO</span><span id="combo" class="value">x1</span></div>
-                <div class="hud-item"><span class="label">NIVEL</span><span id="level" class="value">1</span></div>
-                <div class="hud-item"><span class="label">VIDAS</span><span id="lives" class="value">❤️❤️❤️</span></div>
-            </div>
-            <div class="timer-container">
-                <div id="timerBar" class="timer-bar"></div><span id="timerText" class="timer-text">5.0s</span>
-            </div>
-            <div class="word-container">
-                <div id="targetWord" class="target-word">VELOCITY</div>
-                <div id="feedback" class="feedback"></div>
-            </div>
-            <div class="input-container"><input type="text" id="wordInput" class="word-input"
-                    placeholder="Escribe aquí..." autocomplete="off" autofocus></div>
-            <div class="game-stats">
-                <div class="stat"><span class="stat-label">WPM</span><span id="wpm" class="stat-value">0</span></div>
-                <div class="stat"><span class="stat-label">PRECISIÓN</span><span id="accuracy"
-                        class="stat-value">100%</span></div>
-                <div class="stat"><span class="stat-label">RACHA</span><span id="streak" class="stat-value">0</span>
-                </div>
-            </div>
-            <div id="powerups" class="powerups"></div>
-        </div>
+        <div id="game-screen" class="screen active">
+            <div class="word-display" id="word-display">PREPARADO</div>
+            <input type="text" class="word-input" id="word-input" autocomplete="off" spellcheck="false" autofocus>
 
-        <!-- Game Over -->
-        <div id="gameOverScreen" class="screen" style="display:none;">
-            <div class="gameover-content">
-                <h2 class="gameover-title">GAME OVER</h2>
-                <div class="final-stats">
-                    <div class="final-stat"><span class="final-label">PUNTUACIÓN FINAL</span><span id="finalScore"
-                            class="final-value">0</span></div>
-                    <div class="final-stat"><span class="final-label">PALABRAS CORRECTAS</span><span id="finalWords"
-                            class="final-value">0</span></div>
-                    <div class="final-stat"><span class="final-label">WPM PROMEDIO</span><span id="finalWPM"
-                            class="final-value">0</span></div>
-                    <div class="final-stat"><span class="final-label">PRECISIÓN</span><span id="finalAccuracy"
-                            class="final-value">0%</span></div>
-                    <div class="final-stat"><span class="final-label">MEJOR RACHA</span><span id="finalStreak"
-                            class="final-value">0</span></div>
-                </div>
-                <div id="newRecord" class="new-record" style="display:none;">🏆 ¡NUEVO RÉCORD! 🏆</div>
-                <div class="gameover-buttons">
-                    <button id="retryBtn" class="main-btn">REINTENTAR</button>
-                    <button id="menuBtn" class="secondary-btn">MENÚ PRINCIPAL</button>
-                </div>
+            <div class="powerups-container" id="powerups">
+                <!-- Powerups will be injected here -->
+            </div>
+
+            <div class="combo-counter" id="combo-display">Combo: 0x</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
             </div>
         </div>
 
-        <!-- Stats -->
-        <div id="statsScreen" class="screen" style="display:none;">
-            <div class="stats-content">
-                <h2 class="stats-title">📊 ESTADÍSTICAS</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-value" id="totalGames">0</div>
-                        <div class="stat-card-label">Partidas Jugadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-value" id="highScore">0</div>
-                        <div class="stat-card-label">Puntuación Máxima</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-value" id="totalWords">0</div>
-                        <div class="stat-card-label">Palabras Totales</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-value" id="bestWPM">0</div>
-                        <div class="stat-card-label">Mejor WPM</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-value" id="avgAccuracy">0%</div>
-                        <div class="stat-card-label">Precisión Promedio</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-card-value" id="longestStreak">0</div>
-                        <div class="stat-card-label">Racha Más Larga</div>
-                    </div>
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="screen">
+            <h1 class="game-over-title">GAME OVER</h1>
+            <div class="final-score">Puntuación Final: <span id="final-score">0</span></div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="final-wpm">0</div>
+                    <div class="stat-label">WPM</div>
                 </div>
-                <button id="closeStatsBtn" class="main-btn">CERRAR</button>
+                <div class="stat-item">
+                    <div class="stat-value" id="final-accuracy">0%</div>
+                    <div class="stat-label">Precisión</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="final-words">0</div>
+                    <div class="stat-label">Palabras</div>
+                </div>
             </div>
+            <button class="restart-btn" onclick="location.reload()">JUGAR DE NUEVO</button>
+            <button class="restart-btn" onclick="location.href='index.html'"
+                style="margin-top: 20px; background: transparent; border: 2px solid #00ff88; color: #00ff88;">MENÚ
+                PRINCIPAL</button>
         </div>
     </div>
+
+    <script src="words.js"></script>
+    <script src="progression.js"></script>
     <script src="classic-mode.js"></script>
 </body>
 
