@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Reproductor de Música</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #b026ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .player-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(176, 38, 255, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .now-playing {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .track-title {
+            font-size: 1.5rem;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .track-artist {
+            color: #aaa;
+            font-size: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .control-btn {
+            background: rgba(176, 38, 255, 0.2);
+            border: 2px solid #b026ff;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #b026ff;
+            transform: scale(1.1);
+        }
+
+        .control-btn.play {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+
+        .volume-control {
+            margin: 30px 0;
+        }
+
+        .volume-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #b026ff;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #b026ff;
+            cursor: pointer;
+        }
+
+        .upload-section {
+            background: rgba(0, 255, 136, 0.05);
+            border: 2px dashed #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-section:hover {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            background: #b026ff;
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: #8338ec;
+            transform: scale(1.05);
+        }
+
+        .btn.secondary {
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .btn.secondary:hover {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .playlist {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .playlist-title {
+            font-size: 1.3rem;
+            color: #00ff88;
+            margin-bottom: 15px;
+        }
+
+        .track-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .track-item:hover {
+            background: rgba(176, 38, 255, 0.2);
+        }
+
+        .track-item.active {
+            background: rgba(176, 38, 255, 0.3);
+            border-left: 4px solid #b026ff;
+        }
+
+        .track-info {
+            flex: 1;
+        }
+
+        .track-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .track-duration {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .youtube-search {
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(176, 38, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #b026ff;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .controls {
+                gap: 10px;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            .control-btn.play {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎵 REPRODUCTOR DE MÚSICA</h1>
+
+        <div class="player-card">
+            <div class="now-playing">
+                <div class="track-title" id="current-title">Sin música</div>
+                <div class="track-artist" id="current-artist">Sube o selecciona una canción</div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="previousTrack()">⏮️</button>
+                <button class="control-btn play" onclick="togglePlay()" id="play-btn">▶️</button>
+                <button class="control-btn" onclick="nextTrack()">⏭️</button>
+            </div>
+
+            <div class="volume-control">
+                <div class="volume-label">
+                    <span>🔊 Volumen Música</span>
+                    <span id="music-volume-value">70%</span>
+                </div>
+                <input type="range" min="0" max="100" value="70" id="music-volume"
+                    oninput="updateMusicVolume(this.value)">
+            </div>
+
+            <div class="volume-control">
+                <div class="volume-label">
+                    <span>🎮 Volumen Efectos del Juego</span>
+                    <span id="sfx-volume-value">50%</span>
+                </div>
+                <input type="range" min="0" max="100" value="50" id="sfx-volume" oninput="updateSFXVolume(this.value)">
+            </div>
+        </div>
+
+        <div class="upload-section" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icon">📁</div>
+            <h3>Sube tu música desde tu PC/Móvil</h3>
+            <p style="color: #aaa; margin-top: 10px;">Formatos soportados: MP3, WAV, OGG</p>
+            <input type="file" id="file-input" accept="audio/*" multiple style="display: none;"
+                onchange="handleFileUpload(event)">
+        </div>
+
+        <div class="youtube-search">
+            <h3 style="color: #00ff88; margin-bottom: 15px;">🔍 Buscar Música en YouTube</h3>
+            <input type="text" class="search-input" id="youtube-search"
+                placeholder="Busca tu canción favorita (ej: Lofi Hip Hop)">
+            <button class="btn" onclick="searchYouTube()">Buscar</button>
+            <p style="color: #aaa; font-size: 0.9rem; margin-top: 10px;">Nota: Esta función usa YouTube embebido.
+                Asegúrate de tener conexión a internet.</p>
+        </div>
+
+        <div class="playlist">
+            <div class="playlist-title">📀 Playlist Predefinida</div>
+            <div id="playlist-container">
+                <!-- Tracks will be added here -->
+            </div>
+        </div>
+
+        <button class="btn secondary" onclick="location.href='index.html'">🏠 Volver al Menú</button>
+    </div>
+
+    <audio id="audio-player" preload="auto"></audio>
+
+    <script>
+        // Global Music Player State
+        const MusicPlayer = {
+            currentTrack: null,
+            isPlaying: false,
+            playlist: [],
+            currentIndex: 0,
+            audioElement: document.getElementById('audio-player'),
+            musicVolume: 0.7,
+            sfxVolume: 0.5
+        };
+
+        // Predefined Playlist (YouTube embeds or local files)
+        const defaultPlaylist = [
+            { title: "Lofi Hip Hop", artist: "ChilledCow", url: "https://www.youtube.com/watch?v=jfKfPfyJRdk", type: "youtube" },
+            { title: "Cyberpunk Synthwave", artist: "The Midnight", url: "https://www.youtube.com/watch?v=MV_3Dpw-BRY", type: "youtube" },
+            { title: "Electronic Focus", artist: "Brain.fm", url: "https://www.youtube.com/watch?v=kOa_KKLbXq0", type: "youtube" },
+            { title: "Ambient Space", artist: "NASA", url: "https://www.youtube.com/watch?v=4czjS9h4Fpg", type: "youtube" }
+        ];
+
+        // Initialize
+        function init() {
+            MusicPlayer.playlist = [...defaultPlaylist];
+            renderPlaylist();
+            loadSettings();
+        }
+
+        function renderPlaylist() {
+            const container = document.getElementById('playlist-container');
+            container.innerHTML = '';
+
+            MusicPlayer.playlist.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'track-item' + (index === MusicPlayer.currentIndex ? ' active' : '');
+                item.onclick = () => playTrack(index);
+                item.innerHTML = `
+                    <div class="track-info">
+                        <div class="track-name">${track.title}</div>
+                        <div class="track-duration">${track.artist}</div>
+                    </div>
+                    <div>${track.type === 'youtube' ? '🎥' : '🎵'}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function playTrack(index) {
+            MusicPlayer.currentIndex = index;
+            const track = MusicPlayer.playlist[index];
+
+            if (track.type === 'youtube') {
+                // For YouTube, we'll open in a new tab (browser limitation)
+                alert(`Abriendo ${track.title} en YouTube. Nota: Por limitaciones del navegador, YouTube se abrirá en una nueva pestaña.`);
+                window.open(track.url, '_blank');
+            } else {
+                // For local files
+                MusicPlayer.audioElement.src = track.url;
+                MusicPlayer.audioElement.volume = MusicPlayer.musicVolume;
+                MusicPlayer.audioElement.play();
+                MusicPlayer.isPlaying = true;
+                document.getElementById('play-btn').textContent = '⏸️';
+            }
+
+            document.getElementById('current-title').textContent = track.title;
+            document.getElementById('current-artist').textContent = track.artist;
+            renderPlaylist();
+        }
+
+        function togglePlay() {
+            if (MusicPlayer.currentTrack === null && MusicPlayer.playlist.length > 0) {
+                playTrack(0);
+                return;
+            }
+
+            if (MusicPlayer.isPlaying) {
+                MusicPlayer.audioElement.pause();
+                MusicPlayer.isPlaying = false;
+                document.getElementById('play-btn').textContent = '▶️';
+            } else {
+                MusicPlayer.audioElement.play();
+                MusicPlayer.isPlaying = true;
+                document.getElementById('play-btn').textContent = '⏸️';
+            }
+        }
+
+        function nextTrack() {
+            MusicPlayer.currentIndex = (MusicPlayer.currentIndex + 1) % MusicPlayer.playlist.length;
+            playTrack(MusicPlayer.currentIndex);
+        }
+
+        function previousTrack() {
+            MusicPlayer.currentIndex = (MusicPlayer.currentIndex - 1 + MusicPlayer.playlist.length) % MusicPlayer.playlist.length;
+            playTrack(MusicPlayer.currentIndex);
+        }
+
+        function updateMusicVolume(value) {
+            MusicPlayer.musicVolume = value / 100;
+            MusicPlayer.audioElement.volume = MusicPlayer.musicVolume;
+            document.getElementById('music-volume-value').textContent = value + '%';
+            saveSettings();
+        }
+
+        function updateSFXVolume(value) {
+            MusicPlayer.sfxVolume = value / 100;
+            document.getElementById('sfx-volume-value').textContent = value + '%';
+            saveSettings();
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            for (let file of files) {
+                const url = URL.createObjectURL(file);
+                MusicPlayer.playlist.push({
+                    title: file.name.replace(/\.[^/.]+$/, ""),
+                    artist: "Local File",
+                    url: url,
+                    type: "local"
+                });
+            }
+            renderPlaylist();
+            alert(`${files.length} archivo(s) añadido(s) a la playlist`);
+        }
+
+        function searchYouTube() {
+            const query = document.getElementById('youtube-search').value;
+            if (!query) {
+                alert('Por favor escribe algo para buscar');
+                return;
+            }
+
+            const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+            alert(`Abriendo búsqueda de YouTube para: "${query}". Copia el enlace del video y pégalo en el reproductor.`);
+            window.open(searchUrl, '_blank');
+        }
+
+        function saveSettings() {
+            localStorage.setItem('velocity_music_volume', MusicPlayer.musicVolume);
+            localStorage.setItem('velocity_sfx_volume', MusicPlayer.sfxVolume);
+        }
+
+        function loadSettings() {
+            const musicVol = localStorage.getItem('velocity_music_volume');
+            const sfxVol = localStorage.getItem('velocity_sfx_volume');
+
+            if (musicVol) {
+                MusicPlayer.musicVolume = parseFloat(musicVol);
+                document.getElementById('music-volume').value = MusicPlayer.musicVolume * 100;
+                document.getElementById('music-volume-value').textContent = Math.round(MusicPlayer.musicVolume * 100) + '%';
+            }
+
+            if (sfxVol) {
+                MusicPlayer.sfxVolume = parseFloat(sfxVol);
+                document.getElementById('sfx-volume').value = MusicPlayer.sfxVolume * 100;
+                document.getElementById('sfx-volume-value').textContent = Math.round(MusicPlayer.sfxVolume * 100) + '%';
+            }
+        }
+
+        // Auto-next track
+        MusicPlayer.audioElement.addEventListener('ended', nextTrack);
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+
+</html>

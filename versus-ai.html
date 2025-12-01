@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Versus IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ff006e, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .vs-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 30px;
+        }
+
+        .player-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        .ai-panel {
+            border-color: #ff006e;
+        }
+
+        .player-name {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        .ai-panel .player-name {
+            color: #ff006e;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00cc66);
+            transition: width 0.3s;
+        }
+
+        .ai-panel .progress-fill {
+            background: linear-gradient(90deg, #ff006e, #cc0055);
+        }
+
+        .vs-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #ffd700;
+        }
+
+        .word-display {
+            font-size: 3rem;
+            text-align: center;
+            margin: 30px 0;
+            color: #ffd700;
+            min-height: 80px;
+        }
+
+        .input-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            font-size: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #00ff88;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #00ff88;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: #00ff88;
+            border: none;
+            color: black;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        .btn.secondary {
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .difficulty-selector {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .difficulty-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #666;
+            color: white;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn:hover {
+            border-color: #00ff88;
+        }
+
+        .difficulty-btn.active {
+            background: #00ff88;
+            color: black;
+            border-color: #00ff88;
+        }
+
+        @media (max-width: 768px) {
+            .vs-container {
+                grid-template-columns: 1fr;
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .word-display {
+                font-size: 2rem;
+            }
+
+            input {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🤖 VERSUS IA</h1>
+
+    <div class="difficulty-selector" id="difficulty-selector">
+        <h3 style="margin-bottom: 15px;">Selecciona Dificultad de la IA:</h3>
+        <button class="difficulty-btn" onclick="setDifficulty('easy')">Fácil</button>
+        <button class="difficulty-btn active" onclick="setDifficulty('normal')">Normal</button>
+        <button class="difficulty-btn" onclick="setDifficulty('hard')">Difícil</button>
+        <button class="difficulty-btn" onclick="setDifficulty('expert')">Experto</button>
+        <button class="difficulty-btn" onclick="setDifficulty('impossible')">Imposible</button>
+        <br><br>
+        <button class="btn" onclick="startGame()">INICIAR DUELO</button>
+    </div>
+
+    <div id="game-area" style="display: none; width: 100%;">
+        <div class="vs-container">
+            <div class="player-panel">
+                <div class="player-name">👤 TÚ</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="player-progress" style="width: 0%;"></div>
+                </div>
+                <div class="stat-value" id="player-score">0</div>
+                <div class="stat-label">Palabras</div>
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <div class="player-panel ai-panel">
+                <div class="player-name">🤖 IA</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="ai-progress" style="width: 0%;"></div>
+                </div>
+                <div class="stat-value" id="ai-score">0</div>
+                <div class="stat-label">Palabras</div>
+            </div>
+        </div>
+
+        <div class="word-display" id="word-display">PREPARADO</div>
+
+        <div class="input-area">
+            <input type="text" id="word-input" placeholder="Escribe aquí..." autocomplete="off" autofocus>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="timer">30</div>
+                <div class="stat-label">Segundos</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">WPM</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-screen" style="display: none; text-align: center;">
+        <h2 id="result-title" style="font-size: 3rem; margin-bottom: 20px;"></h2>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-value" id="final-player-score">0</div>
+                <div class="stat-label">Tus Palabras</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="final-ai-score">0</div>
+                <div class="stat-label">Palabras IA</div>
+            </div>
+        </div>
+        <button class="btn" onclick="location.reload()">REVANCHA</button>
+        <button class="btn secondary" onclick="location.href='game-modes.html'">VOLVER</button>
+    </div>
+
+    <script src="words.js"></script>
+    <script>
+        let difficulty = 'normal';
+        let gameActive = false;
+        let playerScore = 0;
+        let aiScore = 0;
+        let currentWord = '';
+        let timeLeft = 30;
+        let timerInterval;
+        let aiInterval;
+        let startTime;
+        let charsTyped = 0;
+
+        const difficultySettings = {
+            easy: { speed: 3000, accuracy: 0.7 },
+            normal: { speed: 2000, accuracy: 0.85 },
+            hard: { speed: 1500, accuracy: 0.92 },
+            expert: { speed: 1000, accuracy: 0.97 },
+            impossible: { speed: 500, accuracy: 0.99 }
+        };
+
+        function setDifficulty(level) {
+            difficulty = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function startGame() {
+            document.getElementById('difficulty-selector').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
+
+            gameActive = true;
+            playerScore = 0;
+            aiScore = 0;
+            timeLeft = 30;
+            startTime = Date.now();
+            charsTyped = 0;
+
+            nextWord();
+            timerInterval = setInterval(updateTimer, 1000);
+            aiInterval = setInterval(aiPlay, difficultySettings[difficulty].speed);
+
+            document.getElementById('word-input').focus();
+        }
+
+        function nextWord() {
+            if (typeof WordBank !== 'undefined') {
+                currentWord = WordBank.getRandomWord();
+            } else {
+                const fallback = ["velocidad", "teclado", "juego", "codigo", "datos"];
+                currentWord = fallback[Math.floor(Math.random() * fallback.length)];
+            }
+
+            document.getElementById('word-display').textContent = currentWord;
+            document.getElementById('word-input').value = '';
+        }
+
+        function aiPlay() {
+            if (!gameActive) return;
+
+            // AI "types" with some randomness
+            if (Math.random() < difficultySettings[difficulty].accuracy) {
+                aiScore++;
+                document.getElementById('ai-score').textContent = aiScore;
+                updateProgress();
+
+                // Visual feedback
+                const aiPanel = document.querySelector('.ai-panel');
+                aiPanel.style.boxShadow = '0 0 30px #ff006e';
+                setTimeout(() => aiPanel.style.boxShadow = 'none', 200);
+            }
+        }
+
+        document.getElementById('word-input').addEventListener('input', (e) => {
+            if (!gameActive) return;
+
+            const input = e.target.value.trim().toLowerCase();
+
+            if (input === currentWord) {
+                playerScore++;
+                charsTyped += currentWord.length;
+                document.getElementById('player-score').textContent = playerScore;
+                updateProgress();
+                nextWord();
+
+                // Visual feedback
+                const playerPanel = document.querySelector('.player-panel');
+                playerPanel.style.boxShadow = '0 0 30px #00ff88';
+                setTimeout(() => playerPanel.style.boxShadow = 'none', 200);
+            }
+        });
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+
+            // Update WPM
+            const elapsedMin = (Date.now() - startTime) / 60000;
+            const wpm = Math.round((charsTyped / 5) / elapsedMin) || 0;
+            document.getElementById('wpm').textContent = wpm;
+
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function updateProgress() {
+            const total = playerScore + aiScore;
+            if (total === 0) return;
+
+            const playerPercent = (playerScore / total) * 100;
+            const aiPercent = (aiScore / total) * 100;
+
+            document.getElementById('player-progress').style.width = playerPercent + '%';
+            document.getElementById('ai-progress').style.width = aiPercent + '%';
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            clearInterval(aiInterval);
+
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+
+            document.getElementById('final-player-score').textContent = playerScore;
+            document.getElementById('final-ai-score').textContent = aiScore;
+
+            const resultTitle = document.getElementById('result-title');
+            if (playerScore > aiScore) {
+                resultTitle.textContent = '🏆 ¡VICTORIA!';
+                resultTitle.style.color = '#00ff88';
+            } else if (playerScore < aiScore) {
+                resultTitle.textContent = '💀 DERROTA';
+                resultTitle.style.color = '#ff006e';
+            } else {
+                resultTitle.textContent = '🤝 EMPATE';
+                resultTitle.style.color = '#ffd700';
+            }
+        }
+    </script>
+</body>
+
+</html>

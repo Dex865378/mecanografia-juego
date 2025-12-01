@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - 1v1 Online</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #b026ff, #00ff88);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .menu-screen {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(176, 38, 255, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-card:hover {
+            border-color: #b026ff;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(176, 38, 255, 0.3);
+        }
+
+        .mode-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .mode-title {
+            font-size: 1.3rem;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .mode-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .room-code-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #b026ff;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .room-code-input:focus {
+            outline: none;
+            border-color: #00ff88;
+        }
+
+        .btn {
+            background: #b026ff;
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #8338ec;
+            transform: scale(1.05);
+        }
+
+        .btn.secondary {
+            background: transparent;
+            border: 2px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .btn.secondary:hover {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .waiting-screen {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(176, 38, 255, 0.3);
+            border-top-color: #b026ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .room-code-display {
+            background: rgba(176, 38, 255, 0.2);
+            border: 2px solid #b026ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .code {
+            font-size: 3rem;
+            color: #00ff88;
+            letter-spacing: 10px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>⚡ 1v1 ONLINE</h1>
+
+    <div id="menu-screen" class="menu-screen">
+        <div class="mode-selector">
+            <div class="mode-card" onclick="quickMatch()">
+                <div class="mode-icon">🎯</div>
+                <div class="mode-title">Partida Rápida</div>
+                <div class="mode-desc">Búsqueda automática de oponente</div>
+            </div>
+
+            <div class="mode-card" onclick="showCreateRoom()">
+                <div class="mode-icon">🏠</div>
+                <div class="mode-title">Crear Sala</div>
+                <div class="mode-desc">Juega con amigos</div>
+            </div>
+        </div>
+
+        <div id="join-room-section" style="display: none;">
+            <h3 style="margin-bottom: 15px;">Unirse a Sala Privada</h3>
+            <input type="text" class="room-code-input" id="room-code-input" placeholder="Código de 6 dígitos"
+                maxlength="6">
+            <button class="btn" onclick="joinRoom()">UNIRSE</button>
+            <button class="btn secondary" onclick="hideJoinRoom()">CANCELAR</button>
+        </div>
+
+        <button class="btn secondary" onclick="location.href='game-modes.html'" style="margin-top: 30px;">🏠
+            VOLVER</button>
+    </div>
+
+    <div id="waiting-screen" style="display: none;">
+        <div class="waiting-screen">
+            <h2 style="margin-bottom: 20px;">Buscando oponente...</h2>
+            <div class="spinner"></div>
+            <p style="color: #aaa;">Esto puede tardar unos segundos</p>
+            <button class="btn secondary" onclick="cancelSearch()" style="margin-top: 30px;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="room-screen" style="display: none;">
+        <div class="waiting-screen">
+            <h2>Sala Privada Creada</h2>
+            <div class="room-code-display">
+                <div style="color: #aaa; margin-bottom: 10px;">Comparte este código:</div>
+                <div class="code" id="room-code">ABC123</div>
+                <div style="color: #aaa; margin-top: 10px;">Esperando al oponente...</div>
+            </div>
+            <div class="spinner"></div>
+            <button class="btn secondary" onclick="cancelRoom()">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="game-screen" style="display: none; text-align: center;">
+        <h2 style="margin-bottom: 30px;">¡Oponente encontrado!</h2>
+        <div
+            style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; max-width: 800px; margin: 0 auto;">
+            <h3 style="color: #00ff88; margin-bottom: 20px;">MODO SIMULADO</h3>
+            <p style="color: #aaa; line-height: 1.8; margin-bottom: 20px;">
+                El modo 1v1 Online requiere un servidor backend para funcionar en tiempo real.
+                <br><br>
+                <strong>Funcionalidades que incluiría:</strong>
+            </p>
+            <ul style="text-align: left; color: #aaa; max-width: 500px; margin: 0 auto 30px;">
+                <li>✓ Matchmaking automático por nivel</li>
+                <li>✓ Salas privadas con código de 6 dígitos</li>
+                <li>✓ Chat en vivo durante la partida</li>
+                <li>✓ Visualización del progreso del oponente en tiempo real</li>
+                <li>✓ Sistema de ranking (ELO)</li>
+                <li>✓ Historial de partidas</li>
+            </ul>
+            <p style="color: #00ff88; margin-bottom: 20px;">
+                Para implementar esto necesitarías:
+            </p>
+            <ul style="text-align: left; color: #aaa; max-width: 500px; margin: 0 auto 30px;">
+                <li>• Servidor Node.js con Socket.IO</li>
+                <li>• Base de datos (MongoDB/PostgreSQL)</li>
+                <li>• Hosting con soporte WebSockets</li>
+            </ul>
+            <button class="btn" onclick="simulateMatch()">SIMULAR PARTIDA</button>
+            <button class="btn secondary" onclick="backToMenu()">VOLVER AL MENÚ</button>
+        </div>
+    </div>
+
+    <div id="result-screen" style="display: none; text-align: center;">
+        <h2 style="font-size: 3rem; margin-bottom: 20px; color: #00ff88;">🏆 ¡VICTORIA!</h2>
+        <div
+            style="background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; max-width: 600px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+                <div>
+                    <div style="font-size: 2rem; color: #00ff88;">85</div>
+                    <div style="color: #aaa;">Tu WPM</div>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; color: #ff006e;">72</div>
+                    <div style="color: #aaa;">Oponente WPM</div>
+                </div>
+            </div>
+            <p style="color: #aaa; margin-bottom: 20px;">+50 XP • +25 Monedas</p>
+            <button class="btn" onclick="location.reload()">NUEVA PARTIDA</button>
+            <button class="btn secondary" onclick="location.href='game-modes.html'">VOLVER</button>
+        </div>
+    </div>
+
+    <script>
+        function quickMatch() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('waiting-screen').style.display = 'block';
+
+            // Simulate matchmaking
+            setTimeout(() => {
+                document.getElementById('waiting-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+            }, 3000);
+        }
+
+        function showCreateRoom() {
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('room-screen').style.display = 'block';
+
+            // Generate random room code
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('room-code').textContent = code;
+
+            // Simulate opponent joining
+            setTimeout(() => {
+                document.getElementById('room-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+            }, 5000);
+        }
+
+        function showJoinRoom() {
+            document.getElementById('join-room-section').style.display = 'block';
+        }
+
+        function hideJoinRoom() {
+            document.getElementById('join-room-section').style.display = 'none';
+        }
+
+        function joinRoom() {
+            const code = document.getElementById('room-code-input').value;
+            if (code.length !== 6) {
+                alert('El código debe tener 6 caracteres');
+                return;
+            }
+
+            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('waiting-screen').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('waiting-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+            }, 2000);
+        }
+
+        function cancelSearch() {
+            location.reload();
+        }
+
+        function cancelRoom() {
+            location.reload();
+        }
+
+        function backToMenu() {
+            location.reload();
+        }
+
+        function simulateMatch() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
