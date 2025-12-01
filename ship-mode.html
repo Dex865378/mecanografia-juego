@@ -3,23 +3,21 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VELOCITY - Neon Ship Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Batalla Espacial</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         body {
-            background-color: #050510;
+            background: #050510;
             color: white;
-            overflow: hidden;
             font-family: 'Orbitron', sans-serif;
-            user-select: none;
-            touch-action: none;
         }
 
         canvas {
@@ -33,29 +31,27 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 20px;
         }
 
-        .hud-top {
-            display: flex;
-            justify-content: space-between;
+        .hud-element {
+            position: absolute;
             font-size: 1.5rem;
             text-shadow: 0 0 10px #00ff88;
         }
 
-        .score-box {
+        #score-display {
+            top: 20px;
+            left: 20px;
             color: #00ff88;
         }
 
-        .lives-box {
+        #lives-display {
+            top: 20px;
+            right: 20px;
             color: #ff006e;
         }
 
-        #start-screen,
-        #game-over-screen {
+        .screen {
             position: absolute;
             top: 0;
             left: 0;
@@ -67,155 +63,108 @@
             align-items: center;
             justify-content: center;
             z-index: 100;
-            pointer-events: auto;
-        }
-
-        h1 {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #b026ff, #00ff88);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(176, 38, 255, 0.5);
-        }
-
-        button {
-            background: transparent;
-            border: 2px solid #b026ff;
-            color: #b026ff;
-            padding: 15px 40px;
-            font-size: 1.5rem;
-            font-family: 'Orbitron', sans-serif;
-            cursor: pointer;
-            margin: 10px;
-            transition: all 0.3s;
-            border-radius: 5px;
-            text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(176, 38, 255, 0.2);
-        }
-
-        button:hover {
-            background: #b026ff;
-            color: #fff;
-            box-shadow: 0 0 30px rgba(176, 38, 255, 0.8);
-            transform: scale(1.05);
         }
 
         .hidden {
             display: none !important;
         }
 
-        #custom-text-area {
-            width: 60%;
-            height: 100px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00ff88;
+        button {
+            background: transparent;
+            border: 2px solid #00ff88;
             color: #00ff88;
-            padding: 10px;
-            margin-bottom: 20px;
-            font-family: monospace;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
         }
 
-        /* VIRTUAL KEYBOARD OPTIMIZED FOR MOBILE */
+        button:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        /* Virtual Keyboard for Mobile */
         #virtual-keyboard {
             display: none;
-            position: fixed;
+            position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(5, 5, 16, 0.95);
-            border-top: 2px solid #b026ff;
-            padding: 5px 2px;
-            z-index: 1000005;
-            user-select: none;
-            touch-action: manipulation;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            z-index: 50;
+            pointer-events: auto;
         }
 
         .kb-row {
             display: flex;
             justify-content: center;
-            width: 100%;
-            margin-bottom: 4px;
-            gap: 2px;
+            margin-bottom: 5px;
         }
 
         .kb-key {
-            background: rgba(176, 38, 255, 0.1);
-            border: 1px solid #b026ff;
-            color: #00ff88;
-            border-radius: 6px;
-            flex: 1;
-            max-width: 45px;
-            height: 55px;
+            width: 30px;
+            height: 40px;
+            margin: 2px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.05s;
-            text-shadow: 0 0 5px #00ff88;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            user-select: none;
         }
 
-        .kb-key:active,
         .kb-key.active {
             background: #00ff88;
-            color: #050510;
-            transform: translateY(2px);
-            box-shadow: 0 0 15px #00ff88;
-        }
-
-        /* Mobile adjustments */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            #ui-layer {
-                padding: 10px;
-            }
-
-            .hud-top {
-                font-size: 1rem;
-            }
-
-            #custom-text-area {
-                width: 90%;
-            }
+            color: black;
         }
     </style>
 </head>
 
 <body>
-
     <canvas id="gameCanvas"></canvas>
 
-    <div id="ui-layer">
-        <div class="hud-top">
-            <div class="score-box">SCORE: <span id="score">0</span></div>
-            <div class="lives-box">SHIELD: <span id="lives">100%</span></div>
+    <div id="ui-layer" class="hidden">
+        <div id="score-display">SCORE: <span id="score">0</span></div>
+        <div id="lives-display">SHIELD: <span id="lives">100%</span></div>
+    </div>
+
+    <div id="start-screen" class="screen">
+        <h1 style="font-size: 4rem; color: #b026ff; text-shadow: 0 0 30px #b026ff; margin-bottom: 20px;">BATALLA
+            ESPACIAL</h1>
+        <p style="font-size: 1.2rem; color: #aaa; max-width: 600px; text-align: center;">
+            Escribe las palabras para disparar láseres. Destruye las naves enemigas antes de que impacten.
+        </p>
+        <button onclick="startGame()">INICIAR MISIÓN</button>
+        <button onclick="window.location.href='game-modes.html'"
+            style="border-color: #ff006e; color: #ff006e;">VOLVER</button>
+    </div>
+
+    <div id="game-over-screen" class="hidden screen">
+        <h1 style="color: #ff006e; font-size: 4rem;">SISTEMA CRÍTICO</h1>
+        <p style="font-size: 2rem; margin-bottom: 20px;">Puntuación Final: <span id="final-score">0</span></p>
+        <button onclick="location.reload()">REINICIAR SISTEMA</button>
+        <button onclick="window.location.href='index.html'"
+            style="border-color: #ff006e; color: #ff006e;">ABORTAR</button>
+    </div>
+
+    <!-- Checkpoint Modal -->
+    <div id="checkpoint-modal" class="screen hidden" style="background: rgba(0,0,0,0.9);">
+        <h1 style="font-size: 3rem; color: #00ff88; margin-bottom: 30px;">¡100 ENEMIGOS DESTRUIDOS!</h1>
+        <p style="color: white; font-size: 1.5rem; margin-bottom: 40px;">¿Reparar nave y continuar?</p>
+        <div style="display: flex; gap: 20px;">
+            <button onclick="continueGame()">CONTINUAR</button>
+            <button onclick="location.href='index.html'" style="border-color: #ff006e; color: #ff006e;">SALIR</button>
         </div>
     </div>
 
-    <div id="start-screen">
-        <h1>NEON BATTLE</h1>
-        <p style="margin-bottom: 30px; color: #aaa;">Escribe para destruir.</p>
-        <button onclick="startGame()">INICIAR MISIÓN</button>
-        <button onclick="toggleCustomText()">TEXTO PERSONALIZADO</button>
-        <button onclick="window.location.href='index.html'">VOLVER AL MENÚ</button>
-        <textarea id="custom-text-area" class="hidden" placeholder="Pega tu texto aquí..."></textarea>
-    </div>
-
-    <div id="game-over-screen" class="hidden">
-        <h1>SISTEMA CRÍTICO</h1>
-        <p style="font-size: 2rem; margin-bottom: 20px;">Puntuación: <span id="final-score">0</span></p>
-        <button onclick="location.reload()">REINICIAR</button>
-        <button onclick="window.location.href='index.html'">SALIR</button>
-    </div>
-
-    <!-- VIRTUAL KEYBOARD -->
     <div id="virtual-keyboard">
         <div class="kb-row" id="row1"></div>
         <div class="kb-row" id="row2"></div>
@@ -224,81 +173,37 @@
 
     <script src="words.js"></script>
     <script>
-        // --- CONFIGURACIÓN ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-        // Ajustar canvas
         function resize() {
             canvas.width = window.innerWidth;
-            // Si es móvil y estamos jugando, restar espacio del teclado
-            if (isMobile && state.playing) {
-                canvas.height = window.innerHeight - 200; // Espacio para teclado
-            } else {
-                canvas.height = window.innerHeight;
-            }
+            canvas.height = window.innerHeight;
+            if (isMobile && state.playing) canvas.height -= 200;
         }
         window.addEventListener('resize', resize);
 
-        // --- VIRTUAL KEYBOARD SETUP ---
-        const keys = [
-            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-            ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-        ];
-
-        function initKeyboard() {
-            if (!isMobile) return;
-
-            const kb = document.getElementById('virtual-keyboard');
-            kb.style.display = 'block'; // Mostrar en móvil
-
-            keys.forEach((row, i) => {
-                const rowEl = document.getElementById(`row${i + 1}`);
-                row.forEach(char => {
-                    const keyEl = document.createElement('div');
-                    keyEl.className = 'kb-key';
-                    keyEl.innerText = char;
-                    keyEl.dataset.key = char;
-
-                    // Touch events
-                    keyEl.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        handleInput(char);
-                        keyEl.classList.add('active');
-                        if (navigator.vibrate) navigator.vibrate(10);
-                    });
-
-                    keyEl.addEventListener('touchend', (e) => {
-                        e.preventDefault();
-                        keyEl.classList.remove('active');
-                    });
-
-                    rowEl.appendChild(keyEl);
-                });
-            });
-
-            resize(); // Reajustar canvas
-        }
-
-        // --- AUDIO SYSTEM (Sintetizador) ---
+        // --- AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
         function playSound(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Volume Control
+            const sfxVol = localStorage.getItem('velocity_sfx_volume');
+            const volume = sfxVol ? parseFloat(sfxVol) : 0.3;
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             const now = audioCtx.currentTime;
 
             if (type === 'shoot') {
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(800, now);
                 osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
-                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.setValueAtTime(volume * 0.5, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
                 osc.start(now);
                 osc.stop(now + 0.15);
@@ -306,44 +211,25 @@
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(100, now);
                 osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
-                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.setValueAtTime(volume, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
                 osc.start(now);
                 osc.stop(now + 0.3);
             } else if (type === 'lock') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(1200, now);
-                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.setValueAtTime(volume * 0.5, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
                 osc.start(now);
                 osc.stop(now + 0.1);
-            } else if (type === 'error') {
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(150, now);
-                osc.frequency.linearRampToValueAtTime(100, now + 0.1);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now);
-                osc.stop(now + 0.1);
-            } else if (type === 'levelup') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, now);
-                osc.frequency.linearRampToValueAtTime(880, now + 0.2);
-                gain.gain.setValueAtTime(0.15, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
             }
         }
 
-        // --- ESTADO DEL JUEGO ---
+        // --- GAME STATE ---
         let state = {
             playing: false,
             score: 0,
             lives: 100,
-            wave: 1,
-            levelProgress: 0,
-            levelTarget: 10,
             words: [],
             particles: [],
             lasers: [],
@@ -351,57 +237,38 @@
             lastTime: 0,
             spawnTimer: 0,
             spawnInterval: 2000,
-            globalSpeedMultiplier: 1.0
+            wordsDestroyed: 0
         };
 
-        const ship = {
-            x: 0,
-            y: 0,
-            color: '#b026ff',
-            width: 40,
-            height: 50
-        };
+        const ship = { x: 0, y: 0, color: '#b026ff' };
 
-        // --- LÓGICA ---
         function startGame() {
             state.playing = true;
             state.score = 0;
             state.lives = 100;
-            state.wave = 1;
-            state.levelProgress = 0;
-            state.levelTarget = 10;
             state.words = [];
             state.particles = [];
             state.lasers = [];
             state.targetWord = null;
-            state.globalSpeedMultiplier = 1.0;
-            state.spawnInterval = 2000;
+            state.wordsDestroyed = 0;
 
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('game-over-screen').classList.add('hidden');
             document.getElementById('ui-layer').classList.remove('hidden');
 
             resize();
-            initKeyboard();
             requestAnimationFrame(loop);
         }
 
         function spawnWord() {
-            let text;
-            if (typeof WordBank !== 'undefined') {
-                text = WordBank.getRandomWord().toUpperCase();
-            } else {
-                const fallback = ["NEON", "CYBER", "LASER", "SHIP", "CODE", "DATA", "VOID", "FLUX", "CORE", "GRID"];
-                text = fallback[Math.floor(Math.random() * fallback.length)];
-            }
-
+            let text = typeof WordBank !== 'undefined' ? WordBank.getRandomWord().toUpperCase() : "ERROR";
             const x = Math.random() * (canvas.width - 100) + 50;
             state.words.push({
                 text: text,
                 remaining: text,
                 x: x,
                 y: -50,
-                speed: (Math.random() * 0.5 + 0.5) * state.globalSpeedMultiplier,
+                speed: Math.random() * 0.5 + 0.5,
                 color: '#fff'
             });
         }
@@ -410,98 +277,72 @@
             if (!state.playing) return;
             char = char.toUpperCase();
 
-            if (state.targetWord) {
-                if (state.targetWord.remaining.startsWith(char)) {
-                    // Correct char
-                    shootLaser(state.targetWord.x + (state.targetWord.text.length * 10) / 2, state.targetWord.y);
-                    state.targetWord.remaining = state.targetWord.remaining.substring(1);
-                    playSound('shoot');
+            // Try to continue current target
+            if (state.targetWord && state.targetWord.remaining.startsWith(char)) {
+                shootLaser(state.targetWord.x + 20, state.targetWord.y);
+                state.targetWord.remaining = state.targetWord.remaining.substring(1);
+                playSound('shoot');
 
-                    if (state.targetWord.remaining === '') {
-                        // Word destroyed
-                        destroyWord(state.targetWord);
-                        state.targetWord = null;
-                    }
-                } else {
-                    playSound('error');
+                if (state.targetWord.remaining === '') {
+                    destroyWord(state.targetWord);
+                    state.targetWord = null;
+                }
+                return;
+            }
+
+            // If input doesn't match current target (or no target), try to switch
+            const potentialTargets = state.words.filter(w => w.remaining.startsWith(char));
+            potentialTargets.sort((a, b) => b.y - a.y); // Prioritize closest
+
+            if (potentialTargets.length > 0) {
+                // Switch target!
+                state.targetWord = potentialTargets[0];
+                shootLaser(state.targetWord.x + 20, state.targetWord.y);
+                state.targetWord.remaining = state.targetWord.remaining.substring(1);
+                playSound('lock');
+                playSound('shoot');
+
+                if (state.targetWord.remaining === '') {
+                    destroyWord(state.targetWord);
+                    state.targetWord = null;
                 }
             } else {
-                // Find new target
-                const potentialTargets = state.words.filter(w => w.remaining.startsWith(char));
-
-                // Prioritize closest (highest Y)
-                potentialTargets.sort((a, b) => b.y - a.y);
-
-                if (potentialTargets.length > 0) {
-                    state.targetWord = potentialTargets[0];
-                    state.targetWord.remaining = state.targetWord.remaining.substring(1);
-                    shootLaser(state.targetWord.x, state.targetWord.y);
-                    playSound('lock');
-                    playSound('shoot');
-
-                    if (state.targetWord.remaining === '') {
-                        destroyWord(state.targetWord);
-                        state.targetWord = null;
-                    }
-                } else {
-                    playSound('error');
-                }
+                // Miss
+                // playSound('error'); 
             }
         }
 
         function shootLaser(tx, ty) {
-            state.lasers.push({
-                x: ship.x,
-                y: ship.y,
-                tx: tx,
-                ty: ty,
-                life: 1.0
-            });
+            state.lasers.push({ x: ship.x, y: ship.y, tx: tx, ty: ty, life: 1.0 });
         }
 
         function destroyWord(word) {
             state.score += word.text.length * 10;
-            state.levelProgress++;
+            state.wordsDestroyed++;
             createExplosion(word.x, word.y);
             playSound('explosion');
-
-            // Remove from array
             state.words = state.words.filter(w => w !== word);
 
-            // Level up check
-            if (state.levelProgress >= state.levelTarget) {
-                levelUp();
+            if (state.wordsDestroyed % 100 === 0) {
+                showCheckpoint();
             }
         }
 
-        function levelUp() {
-            state.wave++;
-            state.levelProgress = 0;
-            state.levelTarget += 5;
-            state.globalSpeedMultiplier += 0.2;
-            state.spawnInterval = Math.max(500, state.spawnInterval - 200);
-            playSound('levelup');
+        function showCheckpoint() {
+            state.playing = false;
+            document.getElementById('checkpoint-modal').classList.remove('hidden');
+        }
 
-            // Visual feedback
-            const el = document.createElement('div');
-            el.innerText = `WAVE ${state.wave}`;
-            el.style.position = 'absolute';
-            el.style.top = '50%';
-            el.style.left = '50%';
-            el.style.transform = 'translate(-50%, -50%)';
-            el.style.fontSize = '5rem';
-            el.style.color = '#00ff88';
-            el.style.textShadow = '0 0 20px #00ff88';
-            el.style.zIndex = '1000';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 2000);
+        function continueGame() {
+            state.playing = true;
+            document.getElementById('checkpoint-modal').classList.add('hidden');
+            requestAnimationFrame(loop);
         }
 
         function createExplosion(x, y) {
             for (let i = 0; i < 20; i++) {
                 state.particles.push({
-                    x: x,
-                    y: y,
+                    x: x, y: y,
                     vx: (Math.random() - 0.5) * 10,
                     vy: (Math.random() - 0.5) * 10,
                     life: 1.0,
@@ -514,74 +355,41 @@
             state.playing = false;
             document.getElementById('final-score').innerText = state.score;
             document.getElementById('game-over-screen').classList.remove('hidden');
-            document.getElementById('virtual-keyboard').style.display = 'none';
         }
 
         function loop(timestamp) {
             if (!state.playing) return;
-
             const dt = timestamp - state.lastTime;
             state.lastTime = timestamp;
 
-            // Update Ship Position
             ship.x = canvas.width / 2;
             ship.y = canvas.height - 50;
 
-            // Spawn
             if (timestamp - state.spawnTimer > state.spawnInterval) {
                 spawnWord();
                 state.spawnTimer = timestamp;
             }
 
-            // Update Words
+            // Update
             state.words.forEach(w => {
                 w.y += w.speed;
                 if (w.y > canvas.height) {
                     state.lives -= 10;
-                    playSound('error');
-                    state.words = state.words.filter(target => target !== w);
+                    state.words = state.words.filter(t => t !== w);
                     if (state.targetWord === w) state.targetWord = null;
                 }
             });
 
-            if (state.lives <= 0) {
-                gameOver();
-                return;
-            }
+            if (state.lives <= 0) { gameOver(); return; }
 
-            // Update Particles
-            state.particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= 0.02;
-            });
+            state.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; });
             state.particles = state.particles.filter(p => p.life > 0);
-
-            // Update Lasers
-            state.lasers.forEach(l => {
-                l.life -= 0.1;
-            });
+            state.lasers.forEach(l => l.life -= 0.1);
             state.lasers = state.lasers.filter(l => l.life > 0);
 
             // Draw
             ctx.fillStyle = '#050510';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Grid (Retro effect)
-            ctx.strokeStyle = 'rgba(176, 38, 255, 0.1)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i, canvas.height);
-                ctx.stroke();
-            }
-            for (let i = 0; i < canvas.height; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(0, i);
-                ctx.lineTo(canvas.width, i);
-                ctx.stroke();
-            }
 
             // Draw Ship
             ctx.fillStyle = ship.color;
@@ -604,27 +412,15 @@
             // Draw Words
             ctx.font = 'bold 20px "Orbitron"';
             state.words.forEach(w => {
-                // Draw full text dimmed
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
                 ctx.fillText(w.text, w.x, w.y);
 
-                // Draw remaining text bright
                 ctx.fillStyle = w === state.targetWord ? '#ff006e' : '#00ff88';
                 const typedLen = w.text.length - w.remaining.length;
                 const width = ctx.measureText(w.text.substring(0, typedLen)).width;
                 ctx.fillText(w.remaining, w.x + width, w.y);
-
-                // Target indicator
-                if (w === state.targetWord) {
-                    ctx.strokeStyle = '#ff006e';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(w.x + (width + ctx.measureText(w.remaining).width / 2), w.y - 10, 30, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
             });
 
-            // Draw Particles
             state.particles.forEach(p => {
                 ctx.fillStyle = p.color;
                 ctx.globalAlpha = p.life;
@@ -634,29 +430,13 @@
                 ctx.globalAlpha = 1.0;
             });
 
-            // Update HUD
             document.getElementById('score').innerText = state.score;
             document.getElementById('lives').innerText = state.lives + '%';
 
             requestAnimationFrame(loop);
         }
 
-        // Keyboard Input (Desktop)
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace') return; // Prevent navigation
-            if (e.key.length === 1) {
-                handleInput(e.key);
-            }
-        });
-
-        // Toggle Custom Text
-        function toggleCustomText() {
-            const area = document.getElementById('custom-text-area');
-            area.classList.toggle('hidden');
-        }
-
-        // Init
-        resize();
+        window.addEventListener('keydown', e => handleInput(e.key));
     </script>
 </body>
 

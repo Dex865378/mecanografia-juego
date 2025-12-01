@@ -1,4 +1,4 @@
-// VELOCITY - Classic Mode Logic with Levels & Power-ups
+// VELOCITY - Classic Mode Logic with Difficulty & Checkpoints
 // Game State
 let score = 0;
 let time = 5.00;
@@ -15,6 +15,8 @@ let lives = 3;
 let level = 1;
 let wordsUntilNextLevel = 10;
 let powerups = [];
+let currentDifficulty = 'medium';
+let baseTime = 5.00;
 
 // DOM Elements
 const wordDisplay = document.getElementById('word-display');
@@ -26,6 +28,9 @@ const comboDisplay = document.getElementById('combo-display');
 const progressFill = document.getElementById('progress-fill');
 const gameScreen = document.getElementById('game-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
+const difficultyScreen = document.getElementById('difficulty-screen');
+const gameHud = document.getElementById('game-hud');
+const checkpointModal = document.getElementById('checkpoint-modal');
 
 // Audio
 const bgMusic = document.getElementById('bg-music');
@@ -36,26 +41,49 @@ const levelUpSound = document.getElementById('level-up-sound');
 
 // Init
 wordInput.addEventListener('input', checkInput);
-wordInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !isPlaying && gameOverScreen.style.display !== 'flex') {
-        startGame();
-    }
-});
+// Removed Enter key listener to prevent accidental starts
 
 // Auto-focus input on click anywhere
 document.addEventListener('click', () => {
-    if (isPlaying) wordInput.focus();
+    if (isPlaying && !checkpointModal.style.display === 'flex') wordInput.focus();
 });
+
+function selectDifficulty(diff) {
+    currentDifficulty = diff;
+    document.body.className = `bg-${diff}`;
+
+    switch (diff) {
+        case 'easy':
+            baseTime = 7.00;
+            lives = 5;
+            break;
+        case 'medium':
+            baseTime = 5.00;
+            lives = 3;
+            break;
+        case 'hard':
+            baseTime = 3.50;
+            lives = 2;
+            break;
+        case 'hardcore':
+            baseTime = 2.50;
+            lives = 1;
+            break;
+    }
+
+    difficultyScreen.style.display = 'none';
+    gameHud.style.display = 'flex';
+    startGame();
+}
 
 function startGame() {
     isPlaying = true;
     score = 0;
-    time = 5.00;
+    time = baseTime;
     wordsTyped = 0;
     charsTyped = 0;
     errors = 0;
     combo = 0;
-    lives = 3;
     level = 1;
     wordsUntilNextLevel = 10;
     powerups = [];
@@ -74,10 +102,11 @@ function startGame() {
 
     document.getElementById('game-over-screen').style.display = 'none';
     document.getElementById('game-screen').style.display = 'flex';
+    updateHUD();
 }
 
 function nextWord() {
-    // Use WordBank if available, otherwise fallback
+    // Use WordBank if available
     if (typeof WordBank !== 'undefined') {
         currentWord = WordBank.getRandomWord();
     } else {
@@ -87,7 +116,9 @@ function nextWord() {
 
     wordDisplay.textContent = currentWord;
     wordInput.value = '';
-    time = 5.00; // Reset time per word
+    time = baseTime - (level * 0.1); // Slight speed up per level
+    if (time < 1.5) time = 1.5; // Cap minimum time
+
     updateHUD();
 }
 
@@ -118,7 +149,6 @@ function checkInput() {
     if (input === currentWord) {
         handleSuccess();
     } else if (!currentWord.startsWith(input)) {
-        // Visual feedback for wrong char
         wordInput.style.color = 'red';
     } else {
         wordInput.style.color = 'white';
@@ -140,17 +170,37 @@ function handleSuccess() {
         levelUp();
     }
 
+    // Checkpoint every 100 words
+    if (wordsTyped % 100 === 0) {
+        showCheckpoint();
+        return;
+    }
+
     // Random power-up spawn (10% chance)
     if (Math.random() < 0.1) {
         spawnPowerup();
     }
 
-    // Progression XP
-    if (typeof Progression !== 'undefined') {
-        Progression.addXP(5);
-        Progression.addCoins(1);
-    }
+    nextWord();
+}
 
+function showCheckpoint() {
+    isPlaying = false;
+    clearInterval(timerInterval);
+    bgMusic.pause();
+    checkpointModal.style.display = 'flex';
+}
+
+function continueGame() {
+    checkpointModal.style.display = 'none';
+    isPlaying = true;
+
+    const musicVol = localStorage.getItem('velocity_music_volume');
+    bgMusic.volume = musicVol ? parseFloat(musicVol) : 0.3;
+    bgMusic.play();
+
+    timerInterval = setInterval(updateTimer, 10);
+    wordInput.focus();
     nextWord();
 }
 
@@ -164,7 +214,6 @@ function handleMiss() {
     errorSound.volume = volume;
     errorSound.play().catch(() => { });
 
-    // Shake effect
     document.body.classList.add('shake');
     setTimeout(() => document.body.classList.remove('shake'), 500);
 
@@ -177,17 +226,14 @@ function handleMiss() {
 
 function levelUp() {
     level++;
-    wordsUntilNextLevel = 10 + (level * 2); // Increasing difficulty
+    wordsUntilNextLevel = 10 + (level * 2);
 
     const sfxVol = localStorage.getItem('velocity_sfx_volume');
     const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
     levelUpSound.volume = volume;
     levelUpSound.play().catch(() => { });
 
-    // Visual notification
     showNotification(`🎉 ¡NIVEL ${level}!`, '#00ff88');
-
-    // Bonus points
     score += level * 50;
 }
 
@@ -212,59 +258,24 @@ function spawnPowerup() {
 
 function applyPowerup(type) {
     switch (type) {
-        case '⏰': // Extra time
-            time += 2;
-            showNotification('⏰ +2 Segundos', '#ffd700');
-            break;
-        case '💎': // Double points
-            showNotification('💎 Puntos x2', '#00ffff');
-            setTimeout(() => {
-                score *= 2;
-                updateHUD();
-            }, 100);
-            break;
-        case '🔥': // Combo boost
-            combo += 5;
-            showNotification('🔥 +5 Combo', '#ff6600');
-            break;
-        case '⚡': // Extra life
-            lives++;
-            showNotification('⚡ +1 Vida', '#ff00ff');
-            break;
+        case '⏰': time += 2; showNotification('⏰ +2s', '#ffd700'); break;
+        case '💎': showNotification('💎 x2 Pts', '#00ffff'); break;
+        case '🔥': combo += 5; showNotification('🔥 +5 Combo', '#ff6600'); break;
+        case '⚡': lives++; showNotification('⚡ +1 Vida', '#ff00ff'); break;
     }
 }
 
 function updatePowerupsDisplay() {
     const container = document.getElementById('powerups');
     if (!container) return;
-
-    // Remove expired powerups
     powerups = powerups.filter(p => (Date.now() - p.startTime) < p.duration);
-
-    container.innerHTML = powerups.map(p => `
-        <div class="powerup-icon" style="animation: bounce 0.5s;">
-            ${p.type}
-        </div>
-    `).join('');
+    container.innerHTML = powerups.map(p => `<div class="powerup-icon" style="animation: bounce 0.5s;">${p.type}</div>`).join('');
 }
 
 function showNotification(text, color) {
     const notif = document.createElement('div');
     notif.textContent = text;
-    notif.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: ${color};
-        color: black;
-        padding: 20px 40px;
-        border-radius: 10px;
-        font-size: 2rem;
-        font-weight: bold;
-        z-index: 1000;
-        animation: fadeInOut 2s;
-    `;
+    notif.style.cssText = `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: ${color}; color: black; padding: 20px 40px; border-radius: 10px; font-size: 2rem; font-weight: bold; z-index: 1000; animation: fadeInOut 2s;`;
     document.body.appendChild(notif);
     setTimeout(() => notif.remove(), 2000);
 }
@@ -274,28 +285,19 @@ function updateHUD() {
     timeDisplay.textContent = Math.max(0, time).toFixed(2);
     comboDisplay.textContent = `Combo: ${combo}x`;
 
-    // Update level and lives
     const levelDisplay = document.getElementById('level-display');
     const livesDisplay = document.getElementById('lives-display');
     if (levelDisplay) levelDisplay.textContent = level;
     if (livesDisplay) livesDisplay.textContent = lives;
 
-    // WPM Calculation
     const elapsedMin = (Date.now() - gameStartTime) / 60000;
     const wpm = Math.round((charsTyped / 5) / elapsedMin) || 0;
     wpmDisplay.textContent = wpm;
 
-    // Progress bar (time)
-    const progress = (time / 5.00) * 100;
+    const progress = (time / baseTime) * 100;
     progressFill.style.width = `${progress}%`;
+    progressFill.style.background = time < 2 ? 'red' : 'linear-gradient(90deg, #b026ff, #00ff88)';
 
-    if (time < 2) {
-        progressFill.style.background = 'red';
-    } else {
-        progressFill.style.background = 'linear-gradient(90deg, #b026ff, #00ff88)';
-    }
-
-    // Update powerups
     updatePowerupsDisplay();
 }
 
@@ -305,9 +307,9 @@ function endGame() {
     bgMusic.pause();
 
     document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('game-hud').style.display = 'none';
     document.getElementById('game-over-screen').style.display = 'flex';
 
-    // Final Stats
     document.getElementById('final-score').textContent = score;
     document.getElementById('final-words').textContent = wordsTyped;
 
@@ -318,40 +320,18 @@ function endGame() {
     const accuracy = Math.round(((charsTyped - errors) / charsTyped) * 100) || 0;
     document.getElementById('final-accuracy').textContent = `${accuracy}%`;
 
-    // Save to Progression
     if (typeof Progression !== 'undefined') {
         Progression.addXP(score);
-        if (score > 1000) Progression.unlockAchievement('first_win');
-        if (wpm > 60) Progression.unlockAchievement('speed_demon');
     }
 }
 
-// Add CSS animations
+// CSS Animations
 const style = document.createElement('style');
 style.innerHTML = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-        20%, 40%, 60%, 80% { transform: translateX(10px); }
-    }
-    .shake {
-        animation: shake 0.5s;
-    }
-    @keyframes fadeInOut {
-        0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-        50% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-    .powerup-icon {
-        font-size: 2rem;
-        display: inline-block;
-        margin: 5px;
-    }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); } 20%, 40%, 60%, 80% { transform: translateX(10px); } }
+    .shake { animation: shake 0.5s; }
+    @keyframes fadeInOut { 0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .powerup-icon { font-size: 2rem; display: inline-block; margin: 5px; }
 `;
 document.head.appendChild(style);
-
-// Start game on load
-wordInput.focus();

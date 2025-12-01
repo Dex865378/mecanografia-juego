@@ -116,7 +116,7 @@
 <body>
     <div class="game-container">
         <h1>👁️ MODO CIEGO</h1>
-        <p class="instruction">La palabra se mostrará por 0.5 segundos, luego desaparecerá.</p>
+        <p class="instruction">La palabra se mostrará por 0.5 segundos, luego desaparecerá. (Mínimo 8 letras)</p>
 
         <div class="countdown" id="countdown"></div>
         <div id="target-word">Presiona ENTER para comenzar</div>
@@ -184,7 +184,11 @@
             oscillator.frequency.value = frequency;
             oscillator.type = 'sine';
 
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            // Load Volume
+            const sfxVol = localStorage.getItem('velocity_sfx_volume');
+            const volume = sfxVol ? parseFloat(sfxVol) : 0.3;
+
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
 
             oscillator.start(audioContext.currentTime);
@@ -192,7 +196,20 @@
         }
 
         function nextWord() {
-            currentWord = words[Math.floor(Math.random() * words.length)];
+            // Filter for long words only (> 8 chars)
+            let word = '';
+            if (typeof WordBank !== 'undefined') {
+                let attempts = 0;
+                do {
+                    word = WordBank.getRandomWord();
+                    attempts++;
+                } while (word.length < 8 && attempts < 50);
+                if (word.length < 8) word = "extraordinario"; // Fallback
+            } else {
+                word = "extraordinario";
+            }
+
+            currentWord = word;
             const wordEl = document.getElementById('target-word');
             const countdownEl = document.getElementById('countdown');
 
