@@ -178,14 +178,8 @@ velocity-typing-game/
    - Simplemente abre `index.html` en tu navegador favorito
    - No requiere servidor (100% frontend)
 
-### Opción 2: Despliegue en InfinityFree
 
-1. Descarga `velocity-game-final.zip`
-2. Sube a tu cuenta de InfinityFree
-3. Extrae en la carpeta `htdocs`
-4. ¡Listo! Accede desde tu dominio
-
-### Opción 3: GitHub Pages
+### Opción 2: GitHub Pages
 
 1. Ve a Settings → Pages
 2. Selecciona la rama `main`
