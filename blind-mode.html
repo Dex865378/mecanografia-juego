@@ -34,6 +34,13 @@
             font-size: 3rem;
             margin-bottom: 20px;
             color: #666;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        h1:hover {
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
         }
 
         .instruction {
@@ -115,8 +122,8 @@
 
 <body>
     <div class="game-container">
-        <h1>👁️ MODO CIEGO</h1>
-        <p class="instruction">La palabra se mostrará por 0.5 segundos, luego desaparecerá. (Mínimo 8 letras)</p>
+        <h1 onclick="location.href='game-modes.html'" title="Volver al Inicio">👁️ MODO CIEGO</h1>
+        <p class="instruction">La palabra científica se mostrará por 0.5 segundos. (Mínimo 8 letras)</p>
 
         <div class="countdown" id="countdown"></div>
         <div id="target-word">Presiona ENTER para comenzar</div>
@@ -145,28 +152,13 @@
 
     <script src="words.js"></script>
     <script>
-        // Use WordBank if available, otherwise fallback
-        let words;
-        if (typeof WordBank !== 'undefined') {
-            words = WordBank.common;
-        } else {
-            words = "memoria concentracion enfoque atencion precision exactitud perfeccion maestria habilidad destreza talento capacidad potencial excelencia superioridad dominio control disciplina practica entrenamiento dedicacion esfuerzo voluntad determinacion perseverancia resistencia fortaleza poder fuerza energia impulso motivacion inspiracion creatividad imaginacion vision claridad lucidez consciencia percepcion intuicion sabiduria conocimiento experiencia aprendizaje desarrollo crecimiento evolucion transformacion cambio mejora progreso avance logro exito victoria triunfo gloria honor".split(" ");
-        }
-
-        let stats = {
-            score: 0,
-            perfect: 0,
-            total: 0,
-            gameActive: false,
-            viewTime: 500 // 0.5 seconds
-        };
-
+        let stats = { score: 0, perfect: 0, total: 0, gameActive: false, viewTime: 500 };
         let currentWord = '';
+        let usedWords = new Set();
         let speechSynth = window.speechSynthesis;
 
         function speakWord(word) {
             if (speechSynth.speaking) speechSynth.cancel();
-
             const utterance = new SpeechSynthesisUtterance(word);
             utterance.lang = 'es-ES';
             utterance.rate = 0.7;
@@ -177,34 +169,39 @@
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-
             oscillator.frequency.value = frequency;
             oscillator.type = 'sine';
-
-            // Load Volume
             const sfxVol = localStorage.getItem('velocity_sfx_volume');
             const volume = sfxVol ? parseFloat(sfxVol) : 0.3;
-
             gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + duration);
         }
 
         function nextWord() {
-            // Filter for long words only (> 8 chars)
             let word = '';
             if (typeof WordBank !== 'undefined') {
-                let attempts = 0;
-                do {
-                    word = WordBank.getRandomWord();
-                    attempts++;
-                } while (word.length < 8 && attempts < 50);
-                if (word.length < 8) word = "extraordinario"; // Fallback
+                // Get scientific words only, length >= 8
+                let pool = WordBank.science.filter(w => w.length >= 8);
+
+                // Filter out used words
+                let available = pool.filter(w => !usedWords.has(w));
+
+                if (available.length === 0) {
+                    // Reset if all used
+                    usedWords.clear();
+                    available = pool;
+                }
+
+                if (available.length > 0) {
+                    word = available[Math.floor(Math.random() * available.length)];
+                    usedWords.add(word);
+                } else {
+                    word = "extraordinario"; // Fallback
+                }
             } else {
                 word = "extraordinario";
             }
@@ -213,28 +210,22 @@
             const wordEl = document.getElementById('target-word');
             const countdownEl = document.getElementById('countdown');
 
-            // Show word
             wordEl.textContent = currentWord;
             wordEl.classList.remove('hidden');
-
-            // Speak word
             speakWord(currentWord);
 
-            // Countdown
             let timeLeft = stats.viewTime / 1000;
             countdownEl.textContent = timeLeft.toFixed(1) + 's';
 
             const countdownInterval = setInterval(() => {
                 timeLeft -= 0.1;
                 countdownEl.textContent = timeLeft.toFixed(1) + 's';
-
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
                     countdownEl.textContent = '';
                 }
             }, 100);
 
-            // Hide word after viewTime
             setTimeout(() => {
                 wordEl.classList.add('hidden');
                 document.getElementById('word-input').focus();
@@ -262,24 +253,20 @@
             if (e.key === 'Enter') {
                 const input = e.target.value.trim().toLowerCase();
                 const target = currentWord.toLowerCase();
-
                 stats.total++;
 
                 if (input === target) {
                     stats.score++;
                     stats.perfect++;
-                    playTone(800, 0.1); // Success tone
+                    playTone(800, 0.1);
                     document.body.style.backgroundColor = '#001100';
                     setTimeout(() => document.body.style.backgroundColor = '#000000', 200);
                 } else {
-                    playTone(200, 0.3); // Error tone
+                    playTone(200, 0.3);
                     document.body.style.backgroundColor = '#110000';
                     setTimeout(() => document.body.style.backgroundColor = '#000000', 200);
-
-                    // Speak correct word
                     setTimeout(() => speakWord(currentWord), 500);
                 }
-
                 updateStats();
                 setTimeout(nextWord, 1000);
             }

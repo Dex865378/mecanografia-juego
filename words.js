@@ -1,4 +1,4 @@
-// VELOCITY Word Bank - 500+ Spanish Words
+// VELOCITY Word Bank - Expanded
 const WordBank = {
     common: [
         "tiempo", "juego", "vida", "casa", "mundo", "forma", "parte", "ojos", "mano", "vez",
@@ -59,14 +59,103 @@ const WordBank = {
         "amigo", "enemigo", "vecino", "socio", "colega", "jefe", "lider", "guia", "maestro", "alumno"
     ],
 
-    getRandomWord() {
-        return this.common[Math.floor(Math.random() * this.common.length)];
+    science: [
+        "fotosintesis", "termodinamica", "electromagnetismo", "biotecnologia", "nanotecnologia",
+        "astrofisica", "microbiologia", "paleontologia", "neurociencia", "genetica",
+        "evolucion", "gravedad", "relatividad", "cuantico", "particula", "molecula",
+        "organismo", "ecosistema", "biosfera", "atmosfera", "litosfera", "hidrosfera",
+        "metabolismo", "respiracion", "reproduccion", "mutacion", "seleccion", "adaptacion",
+        "hipotesis", "teoria", "experimento", "observacion", "conclusion", "variable",
+        "constante", "ecuacion", "formula", "calculo", "medida", "precision",
+        "exactitud", "incertidumbre", "probabilidad", "estadistica", "algoritmo", "logaritmo",
+        "exponencial", "derivada", "integral", "vector", "matriz", "tensor",
+        "fractal", "caos", "entropia", "entalpia", "energia", "cinetica",
+        "potencial", "mecanica", "optica", "acustica", "termica", "nuclear",
+        "fusion", "fision", "radiacion", "espectro", "frecuencia", "longitud",
+        "amplitud", "resonancia", "vibracion", "oscilacion", "onda", "particula",
+        "telescopio", "microscopio", "espectroscopio", "sismografo", "barometro", "termometro",
+        "cronometro", "balanza", "pipeta", "probeta", "matraz", "bisturi",
+        "estetoscopio", "electrodo", "cateter", "implante", "protesis", "vacuna",
+        "antibiotico", "antivirus", "bacteria", "virus", "hongo", "parasito",
+        "celula", "tejido", "organo", "sistema", "esqueleto", "musculo",
+        "nervio", "cerebro", "corazon", "pulmon", "higado", "riñon",
+        "estomago", "intestino", "sangre", "linfa", "hormona", "enzima",
+        "proteina", "lipido", "glucido", "vitamina", "mineral", "nutriente",
+        "caloria", "metabolismo", "homeostasis", "inmunidad", "patogeno", "antigeno",
+        "anticuerpo", "fagocito", "linfocito", "neurona", "sinapsis", "impulso",
+        "reflejo", "instinto", "memoria", "aprendizaje", "cognicion", "emocion",
+        "conciencia", "percepcion", "sensacion", "estimulo", "respuesta", "conducta",
+        "etologia", "ecologia", "habitat", "nicho", "poblacion", "comunidad",
+        "bioma", "tundra", "taiga", "bosque", "selva", "desierto",
+        "sabana", "pradera", "arrecife", "estuario", "humedal", "pantano",
+        "clima", "tiempo", "estacion", "ciclo", "carbono", "nitrogeno",
+        "fosforo", "agua", "oxigeno", "ozono", "invernadero", "calentamiento",
+        "cambio", "climatico", "contaminacion", "polucion", "residuo", "reciclaje",
+        "renovable", "sostenible", "ecologico", "ambiental", "conservacion", "preservacion",
+        "extincion", "biodiversidad", "especie", "genero", "familia", "orden",
+        "clase", "filo", "reino", "dominio", "taxonomia", "filogenia",
+        "cladistica", "evolucion", "darwin", "lamarck", "mendel", "pasteur",
+        "curie", "einstein", "newton", "galileo", "copernico", "kepler",
+        "hawking", "tesla", "edison", "bell", "marconi", "morse",
+        "nobel", "turing", "lovelace", "franklin", "watson", "crick"
+    ],
+
+    chemistry: [
+        "hidrogeno", "helio", "litio", "berilio", "boro", "carbono", "nitrogeno", "oxigeno",
+        "fluor", "neon", "sodio", "magnesio", "aluminio", "silicio", "fosforo", "azufre",
+        "cloro", "argon", "potasio", "calcio", "escandio", "titanio", "vanadio", "cromo",
+        "manganeso", "hierro", "cobalto", "niquel", "cobre", "zinc", "galio", "germanio",
+        "arsenico", "selenio", "bromo", "kripton", "rubidio", "estroncio", "itrio", "zirconio",
+        "niobio", "molibdeno", "tecnecio", "rutenio", "rodio", "paladio", "plata", "cadmio",
+        "indio", "estaño", "antimonio", "telurio", "yodo", "xenon", "cesio", "bario",
+        "lantano", "cerio", "praseodimio", "neodimio", "prometio", "samario", "europio", "gadolinio",
+        "terbio", "disprosio", "holmio", "erbio", "tulio", "iterbio", "lutecio", "hafnio",
+        "tantalo", "wolframio", "renio", "osmio", "iridio", "platino", "oro", "mercurio",
+        "talio", "plomo", "bismuto", "polonio", "astato", "radon", "francio", "radio",
+        "actinio", "torio", "protactinio", "uranio", "neptunio", "plutonio", "americio", "curio",
+        "berkelio", "californio", "einstenio", "fermio", "mendelevio", "nobelio", "lawrencio", "rutherfordio",
+        "dubnio", "seaborgio", "bohrio", "hasio", "meitnerio", "darmstatio", "roentgenio", "copernicio",
+        "nihonio", "flerovio", "moscovio", "livermorio", "teneso", "oganeson",
+        "acido", "base", "sal", "oxido", "hidruro", "peroxido", "alcance", "alqueno",
+        "alquino", "alcohol", "eter", "aldehido", "cetona", "ester", "amina", "amida",
+        "nitrilo", "benceno", "fenol", "tolueno", "anilina", "piridina", "polimero", "monomero",
+        "plastico", "caucho", "fibra", "resina", "catalizador", "reaccion", "sintesis", "analisis",
+        "destilacion", "filtracion", "cristalizacion", "cromatografia", "electrolisis", "hidrolisis", "oxidacion", "reduccion",
+        "combustion", "fermentacion", "saponificacion", "neutralizacion", "precipitacion", "disolucion", "solubilidad", "concentracion",
+        "molaridad", "normalidad", "molalidad", "fraccion", "molar", "estequiometria", "equilibrio", "cinetica",
+        "termoquimica", "electroquimica", "radioquimica", "bioquimica", "geoquimica", "petroquimica", "farmacoquimica"
+    ],
+
+    getAllWords() {
+        return [...this.common, ...this.science, ...this.chemistry];
     },
 
-    getWords(count) {
+    getRandomWord(category = 'all') {
+        let pool;
+        if (category === 'science') pool = this.science;
+        else if (category === 'chemistry') pool = this.chemistry;
+        else if (category === 'common') pool = this.common;
+        else pool = this.getAllWords();
+
+        return pool[Math.floor(Math.random() * pool.length)];
+    },
+
+    // Get a random word from specific category with minimum length
+    getRandomWordByLength(category, minLength) {
+        let pool;
+        if (category === 'science') pool = this.science;
+        else if (category === 'chemistry') pool = this.chemistry;
+        else pool = this.getAllWords();
+
+        const filtered = pool.filter(w => w.length >= minLength);
+        if (filtered.length === 0) return this.getRandomWord(category); // Fallback
+        return filtered[Math.floor(Math.random() * filtered.length)];
+    },
+
+    getWords(count, category = 'all') {
         const words = [];
         for (let i = 0; i < count; i++) {
-            words.push(this.getRandomWord());
+            words.push(this.getRandomWord(category));
         }
         return words;
     }

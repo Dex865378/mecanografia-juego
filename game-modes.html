@@ -54,6 +54,8 @@
             padding: 30px;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
         .mode-card:hover {
@@ -144,6 +146,14 @@
         <h1>🎮 SELECCIONA TU MODO</h1>
 
         <div class="modes-grid">
+            <!-- Versus IA (Reemplazando al Clásico original) -->
+            <div class="mode-card" onclick="location.href='versus-ai.html'">
+                <span class="mode-icon">🤖</span>
+                <h2 class="mode-title">Versus IA</h2>
+                <p class="mode-description">Compite contra un bot inteligente. 5 niveles de dificultad.</p>
+                <span class="mode-difficulty hard">COMPETITIVO</span>
+            </div>
+
             <!-- Clásico Fácil -->
             <div class="mode-card" onclick="location.href='classic-easy.html'">
                 <span class="mode-icon">🟢</span>
@@ -270,14 +280,6 @@
                 <h2 class="mode-title">Entrenador IA</h2>
                 <p class="mode-description">Analiza tus errores y genera ejercicios.</p>
                 <span class="mode-difficulty medium">HERRAMIENTA</span>
-            </div>
-
-            <!-- Versus IA -->
-            <div class="mode-card" onclick="location.href='versus-ai.html'">
-                <span class="mode-icon">🤖</span>
-                <h2 class="mode-title">Versus IA</h2>
-                <p class="mode-description">Compite contra un bot inteligente.</p>
-                <span class="mode-difficulty hard">COMPETITIVO</span>
             </div>
         </div>
 
