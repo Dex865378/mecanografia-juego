@@ -64,15 +64,6 @@
             overflow: hidden;
         }
 
-        .line-numbers {
-            text-align: right;
-            padding-right: 20px;
-            color: #858585;
-            user-select: none;
-            font-size: 1.2rem;
-            line-height: 1.6;
-        }
-
         .code-area {
             flex: 1;
             position: relative;
@@ -87,7 +78,6 @@
             top: 0;
             left: 0;
             color: #6a9955;
-            /* Comentario/Fantasma */
             opacity: 0.5;
             pointer-events: none;
             z-index: 1;
@@ -111,36 +101,6 @@
             padding: 0;
             margin: 0;
             overflow: hidden;
-        }
-
-        .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.2em;
-            background-color: #007acc;
-            animation: blink 1s infinite;
-            vertical-align: text-bottom;
-        }
-
-        @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0;
-            }
-        }
-
-        .correct {
-            color: #ce9178;
-        }
-
-        /* String color style */
-        .wrong {
-            background-color: rgba(255, 0, 0, 0.3);
         }
 
         .status-bar {
@@ -207,45 +167,19 @@
         .btn-secondary:hover {
             background: rgba(0, 122, 204, 0.1);
         }
-
-        /* Syntax Highlighting Simulation Classes */
-        .keyword {
-            color: #569cd6;
-        }
-
-        .function {
-            color: #dcdcaa;
-        }
-
-        .string {
-            color: #ce9178;
-        }
-
-        .number {
-            color: #b5cea8;
-        }
-
-        .comment {
-            color: #6a9955;
-        }
     </style>
 </head>
 
 <body>
-
     <div class="header">
         <div class="title">VELOCITY_CODE</div>
         <div class="stats-bar">
-            <div class="stat">Líneas: <span class="stat-value" id="lines-count">0</span></div>
             <div class="stat">Errores: <span class="stat-value" id="errors-count" style="color: #f48771">0</span></div>
             <div class="stat">WPM: <span class="stat-value" id="wpm">0</span></div>
         </div>
     </div>
 
     <div class="editor-container">
-        <div class="line-numbers" id="line-numbers">
-            1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10
-        </div>
         <div class="code-area">
             <div id="target-code"></div>
             <textarea id="user-input" spellcheck="false" autocomplete="off"></textarea>
@@ -254,7 +188,6 @@
 
     <div class="status-bar">
         <div>MODO: INSERCIÓN</div>
-        <div>UTF-8</div>
         <div>JavaScript</div>
     </div>
 
@@ -273,59 +206,46 @@
 
     <script>
         const snippets = [
-            `function binarySearch(arr, target) {
-    let left = 0;
-    let right = arr.length - 1;
-
-    while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        if (arr[mid] === target) {
-            return mid;
-        }
-        if (arr[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-    return -1;
+            `function suma(a, b) {
+    return a + b;
 }`,
-            `const express = require('express');
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
-app.listen(port, () => {
-    console.log(\`App listening on port \${port}\`);
-});`,
-            `class Rectangle {
-    constructor(height, width) {
-        this.height = height;
-        this.width = width;
-    }
-
-    get area() {
-        return this.calcArea();
-    }
-
-    calcArea() {
-        return this.height * this.width;
-    }
+            `var nombre = "Juan";
+var edad = 25;
+console.log(nombre);`,
+            `for (var i = 0; i < 10; i++) {
+    console.log(i);
 }`,
-            `@media (max-width: 600px) {
-    .container {
-        flex-direction: column;
-        padding: 10px;
+            `if (x > 5) {
+    console.log("Mayor");
+} else {
+    console.log("Menor");
+}`,
+            `var numeros = [1, 2, 3, 4, 5];
+var total = 0;
+for (var i = 0; i < numeros.length; i++) {
+    total = total + numeros[i];
+}`,
+            `function factorial(n) {
+    if (n == 0) {
+        return 1;
     }
-    
-    .header {
-        font-size: 1.5rem;
-        color: #333;
-    }
-}`
+    return n * factorial(n - 1);
+}`,
+            `var persona = {
+    nombre: "Ana",
+    edad: 30,
+    ciudad: "Madrid"
+};`,
+            `while (contador < 100) {
+    contador = contador + 1;
+    console.log(contador);
+}`,
+            `function esPar(numero) {
+    return numero % 2 == 0;
+}`,
+            `var texto = "Hola Mundo";
+var mayusculas = texto.toUpperCase();
+console.log(mayusculas);`
         ];
 
         let currentSnippetIndex = 0;
@@ -336,18 +256,12 @@ app.listen(port, () => {
 
         const targetElement = document.getElementById('target-code');
         const inputElement = document.getElementById('user-input');
-        const lineNumbersElement = document.getElementById('line-numbers');
 
         function loadSnippet(index) {
             currentSnippet = snippets[index];
             targetElement.textContent = currentSnippet;
             inputElement.value = '';
             inputElement.focus();
-
-            // Update line numbers
-            const lines = currentSnippet.split('\n').length;
-            lineNumbersElement.innerHTML = Array(lines).fill(0).map((_, i) => i + 1).join('<br>');
-
             startTime = null;
             errors = 0;
             isFinished = false;
@@ -357,39 +271,27 @@ app.listen(port, () => {
 
         function updateStats() {
             document.getElementById('errors-count').textContent = errors;
-
             if (startTime) {
-                const timeElapsed = (Date.now() - startTime) / 60000; // minutes
+                const timeElapsed = (Date.now() - startTime) / 60000;
                 const words = inputElement.value.length / 5;
                 const wpm = Math.round(words / timeElapsed) || 0;
                 document.getElementById('wpm').textContent = wpm;
             }
         }
 
-        inputElement.addEventListener('input', (e) => {
+        inputElement.addEventListener('input', () => {
             if (isFinished) return;
             if (!startTime) startTime = Date.now();
 
             const input = inputElement.value;
-
-            // Check for completion
             if (input === currentSnippet) {
                 finishGame();
                 return;
             }
 
-            // Simple error checking logic
-            // In a real IDE simulation, we would do character by character comparison visually
-            // Here we just prevent typing if it's completely wrong or track errors
-
             const currentLength = input.length;
-            const targetChar = currentSnippet[currentLength - 1];
-            const inputChar = input[currentLength - 1];
-
             if (input !== currentSnippet.substring(0, currentLength)) {
-                // Error detected
                 errors++;
-                // Visual feedback could be added here (e.g., flash red)
                 document.body.style.backgroundColor = '#3a1e1e';
                 setTimeout(() => document.body.style.backgroundColor = '#1e1e1e', 100);
             }
@@ -397,20 +299,13 @@ app.listen(port, () => {
             updateStats();
         });
 
-        // Prevent tab from changing focus
         inputElement.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const start = inputElement.selectionStart;
                 const end = inputElement.selectionEnd;
-
-                // Insert 4 spaces
-                inputElement.value = inputElement.value.substring(0, start) +
-                    "    " + inputElement.value.substring(end);
-
+                inputElement.value = inputElement.value.substring(0, start) + "    " + inputElement.value.substring(end);
                 inputElement.selectionStart = inputElement.selectionEnd = start + 4;
-
-                // Trigger input event manually to check correctness
                 inputElement.dispatchEvent(new Event('input'));
             }
         });
@@ -420,8 +315,7 @@ app.listen(port, () => {
             const timeElapsed = (Date.now() - startTime) / 60000;
             const words = currentSnippet.length / 5;
             const wpm = Math.round(words / timeElapsed);
-            const accuracy = Math.max(0, 100 - (errors * 2)); // Simple accuracy penalty
-
+            const accuracy = Math.max(0, 100 - (errors * 2));
             document.getElementById('final-wpm').textContent = wpm + " WPM";
             document.getElementById('final-accuracy').textContent = accuracy + "%";
             document.getElementById('result-modal').style.display = 'flex';
@@ -432,9 +326,7 @@ app.listen(port, () => {
             loadSnippet(currentSnippetIndex);
         }
 
-        // Initialize
         loadSnippet(0);
-
     </script>
 </body>
 

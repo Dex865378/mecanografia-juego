@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELOCITY - Modo Medio</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .exit-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 0, 110, 0.2);
+            border: 2px solid #ff006e;
+            color: #ff006e;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .exit-btn:hover {
+            background: #ff006e;
+            color: white;
+        }
+
+        .hud {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        .score-box,
+        .timer-box,
+        .wpm-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            border-radius: 15px;
+            padding: 15px 30px;
+            text-align: center;
+        }
+
+        .label {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+
+        .value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00ff88;
+        }
+
+        .word-display {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 5px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            color: #00ff88;
+            text-shadow: 0 0 20px #00ff88;
+        }
+
+        .word-input {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #00ff88;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-align: center;
+            outline: none;
+            text-transform: lowercase;
+        }
+
+        .progress-bar {
+            width: 90%;
+            max-width: 600px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #b026ff, #00ff88);
+            transition: width 0.1s linear;
+        }
+
+        .stats {
+            text-align: center;
+            margin: 20px 0;
+            color: #ffd700;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="game-modes.html" class="exit-btn">❌ SALIR</a>
+
+    <div class="game-container">
+        <div class="hud">
+            <div class="score-box">
+                <div class="label">PUNTUACIÓN</div>
+                <div class="value" id="score">0</div>
+            </div>
+            <div class="timer-box">
+                <div class="label">TIEMPO</div>
+                <div class="value" id="time">5.00</div>
+            </div>
+            <div class="wpm-box">
+                <div class="label">WPM</div>
+                <div class="value" id="wpm">0</div>
+            </div>
+        </div>
+
+        <div class="word-display" id="word-display">PRESIONA ENTER</div>
+        <input type="text" class="word-input" id="word-input" autocomplete="off" spellcheck="false" autofocus>
+
+        <div class="stats">Vidas: <span id="lives">3</span></div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <script src="words.js"></script>
+    <script>
+        let score = 0, time = 5.00, lives = 3, wordsTyped = 0, charsTyped = 0, isPlaying = false;
+        let currentWord = '', timerInterval, gameStartTime;
+
+        const wordDisplay = document.getElementById('word-display');
+        const wordInput = document.getElementById('word-input');
+        const timeDisplay = document.getElementById('time');
+        const scoreDisplay = document.getElementById('score');
+        const wpmDisplay = document.getElementById('wpm');
+        const livesDisplay = document.getElementById('lives');
+        const progressFill = document.getElementById('progress-fill');
+
+        wordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !isPlaying) startGame();
+        });
+
+        wordInput.addEventListener('input', () => {
+            if (!isPlaying) return;
+            const input = wordInput.value.trim().toLowerCase();
+            if (input === currentWord) {
+                score += 10 + Math.floor(time * 10);
+                wordsTyped++;
+                charsTyped += currentWord.length;
+                nextWord();
+            }
+        });
+
+        function startGame() {
+            isPlaying = true;
+            score = 0;
+            lives = 3;
+            wordsTyped = 0;
+            charsTyped = 0;
+            gameStartTime = Date.now();
+            nextWord();
+            timerInterval = setInterval(updateTimer, 10);
+        }
+
+        function nextWord() {
+            currentWord = typeof WordBank !== 'undefined' ? WordBank.getRandomWord() : 'palabra';
+            wordDisplay.textContent = currentWord;
+            wordInput.value = '';
+            time = 5.00;
+            updateHUD();
+        }
+
+        function updateTimer() {
+            if (!isPlaying) return;
+            time -= 0.01;
+            if (time <= 0) {
+                lives--;
+                if (lives <= 0) endGame();
+                else nextWord();
+            }
+            updateHUD();
+        }
+
+        function updateHUD() {
+            scoreDisplay.textContent = score;
+            timeDisplay.textContent = Math.max(0, time).toFixed(2);
+            livesDisplay.textContent = lives;
+            const elapsedMin = (Date.now() - gameStartTime) / 60000;
+            wpmDisplay.textContent = Math.round((charsTyped / 5) / elapsedMin) || 0;
+            progressFill.style.width = `${(time / 5.00) * 100}%`;
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            wordDisplay.textContent = `GAME OVER - ${score} pts`;
+            wordInput.disabled = true;
+        }
+    </script>
+</body>
+
+</html>

@@ -38,7 +38,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(176, 38, 255, 0.5);
         }
 
         .modes-grid {
@@ -55,31 +54,12 @@
             padding: 30px;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mode-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, #b026ff, #00ff88);
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: -1;
         }
 
         .mode-card:hover {
             border-color: #b026ff;
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(176, 38, 255, 0.3);
-        }
-
-        .mode-card:hover::before {
-            opacity: 0.1;
         }
 
         .mode-icon {
@@ -137,7 +117,6 @@
             color: #b026ff;
             padding: 15px 40px;
             font-size: 1.2rem;
-            font-family: 'Orbitron', sans-serif;
             cursor: pointer;
             border-radius: 50px;
             transition: all 0.3s;
@@ -146,7 +125,6 @@
         .back-btn:hover {
             background: #b026ff;
             color: white;
-            box-shadow: 0 0 20px rgba(176, 38, 255, 0.5);
         }
 
         @media (max-width: 768px) {
@@ -166,23 +144,43 @@
         <h1>🎮 SELECCIONA TU MODO</h1>
 
         <div class="modes-grid">
-            <!-- Modo Clásico -->
-            <div class="mode-card" onclick="location.href='classic-mode.html'">
-                <span class="mode-icon">⚡</span>
-                <h2 class="mode-title">Modo Clásico</h2>
-                <p class="mode-description">
-                    El modo original. 5 segundos por palabra, power-ups, logros y música dinámica.
-                </p>
+            <!-- Clásico Fácil -->
+            <div class="mode-card" onclick="location.href='classic-easy.html'">
+                <span class="mode-icon">🟢</span>
+                <h2 class="mode-title">Clásico Fácil</h2>
+                <p class="mode-description">7 segundos por palabra. 5 vidas.</p>
+                <span class="mode-difficulty easy">FÁCIL</span>
+            </div>
+
+            <!-- Clásico Medio -->
+            <div class="mode-card" onclick="location.href='classic-medium.html'">
+                <span class="mode-icon">🟡</span>
+                <h2 class="mode-title">Clásico Medio</h2>
+                <p class="mode-description">5 segundos por palabra. 3 vidas.</p>
                 <span class="mode-difficulty medium">MEDIO</span>
             </div>
 
-            <!-- Modo Nave -->
+            <!-- Clásico Difícil -->
+            <div class="mode-card" onclick="location.href='classic-hard.html'">
+                <span class="mode-icon">🔴</span>
+                <h2 class="mode-title">Clásico Difícil</h2>
+                <p class="mode-description">3.5 segundos por palabra. 2 vidas.</p>
+                <span class="mode-difficulty hard">DIFÍCIL</span>
+            </div>
+
+            <!-- Clásico Hardcore -->
+            <div class="mode-card" onclick="location.href='classic-hardcore.html'">
+                <span class="mode-icon">💀</span>
+                <h2 class="mode-title">Clásico Hardcore</h2>
+                <p class="mode-description">2.5 segundos. UNA SOLA VIDA.</p>
+                <span class="mode-difficulty expert">HARDCORE</span>
+            </div>
+
+            <!-- Batalla Espacial -->
             <div class="mode-card" onclick="location.href='ship-mode.html'">
                 <span class="mode-icon">🚀</span>
                 <h2 class="mode-title">Batalla Espacial</h2>
-                <p class="mode-description">
-                    Estilo Z-Type. Dispara láseres escribiendo. Niveles progresivos infinitos.
-                </p>
+                <p class="mode-description">Dispara láseres escribiendo. Texto personalizado.</p>
                 <span class="mode-difficulty hard">DIFÍCIL</span>
             </div>
 
@@ -190,49 +188,39 @@
             <div class="mode-card" onclick="location.href='zen-mode.html'">
                 <span class="mode-icon">🧘</span>
                 <h2 class="mode-title">Modo Zen</h2>
-                <p class="mode-description">
-                    Sin presión de tiempo. Enfócate en la precisión. Perfecto para aprender.
-                </p>
+                <p class="mode-description">Sin presión de tiempo. Enfócate en precisión.</p>
                 <span class="mode-difficulty easy">FÁCIL</span>
             </div>
 
-            <!-- Modo Hardcore -->
-            <div class="mode-card" onclick="location.href='hardcore-mode.html'">
-                <span class="mode-icon">💀</span>
-                <h2 class="mode-title">Modo Hardcore</h2>
-                <p class="mode-description">
-                    Una sola vida. Sin errores permitidos. Solo para los mejores.
-                </p>
-                <span class="mode-difficulty expert">EXPERTO</span>
-            </div>
-
-            <!-- Modo Dictado -->
-            <div class="mode-card" onclick="location.href='dictation-mode.html'">
-                <span class="mode-icon">🎧</span>
-                <h2 class="mode-title">Modo Dictado</h2>
-                <p class="mode-description">
-                    Escucha la palabra y escríbela. Mejora tu ortografía y velocidad.
-                </p>
-                <span class="mode-difficulty medium">MEDIO</span>
+            <!-- Modo Ciego -->
+            <div class="mode-card" onclick="location.href='blind-mode.html'">
+                <span class="mode-icon">👁️</span>
+                <h2 class="mode-title">Modo Ciego</h2>
+                <p class="mode-description">La palabra desaparece. Solo tu memoria.</p>
+                <span class="mode-difficulty expert">MAESTRO</span>
             </div>
 
             <!-- Modo Código -->
             <div class="mode-card" onclick="location.href='code-mode.html'">
                 <span class="mode-icon">💻</span>
                 <h2 class="mode-title">Modo Código</h2>
-                <p class="mode-description">
-                    Escribe snippets de código. Ideal para programadores.
-                </p>
+                <p class="mode-description">Escribe snippets de código JavaScript.</p>
                 <span class="mode-difficulty hard">DIFÍCIL</span>
+            </div>
+
+            <!-- Modo Dictado -->
+            <div class="mode-card" onclick="location.href='dictation-mode.html'">
+                <span class="mode-icon">🎧</span>
+                <h2 class="mode-title">Modo Dictado</h2>
+                <p class="mode-description">Escucha y escribe. Mejora tu ortografía.</p>
+                <span class="mode-difficulty medium">MEDIO</span>
             </div>
 
             <!-- Modo Educativo -->
             <div class="mode-card" onclick="location.href='education-mode.html'">
                 <span class="mode-icon">📚</span>
                 <h2 class="mode-title">Modo Educativo</h2>
-                <p class="mode-description">
-                    Aprende mecanografía desde cero. Lecciones paso a paso.
-                </p>
+                <p class="mode-description">Aprende mecanografía desde cero.</p>
                 <span class="mode-difficulty easy">PRINCIPIANTE</span>
             </div>
 
@@ -240,9 +228,7 @@
             <div class="mode-card" onclick="location.href='daily-challenge.html'">
                 <span class="mode-icon">🏆</span>
                 <h2 class="mode-title">Desafío Diario</h2>
-                <p class="mode-description">
-                    Un reto nuevo cada día. Compite con jugadores de todo el mundo.
-                </p>
+                <p class="mode-description">Un reto nuevo cada día.</p>
                 <span class="mode-difficulty medium">DIARIO</span>
             </div>
 
@@ -250,9 +236,7 @@
             <div class="mode-card" onclick="location.href='survival-mode.html'">
                 <span class="mode-icon">⚔️</span>
                 <h2 class="mode-title">Modo Survival</h2>
-                <p class="mode-description">
-                    Palabras infinitas cada vez más rápidas. ¿Cuánto aguantas?
-                </p>
+                <p class="mode-description">Palabras infinitas cada vez más rápidas.</p>
                 <span class="mode-difficulty expert">EXTREMO</span>
             </div>
 
@@ -260,29 +244,15 @@
             <div class="mode-card" onclick="location.href='meme-mode.html'">
                 <span class="mode-icon">😂</span>
                 <h2 class="mode-title">Modo Meme</h2>
-                <p class="mode-description">
-                    Palabras random graciosas y frases de memes. ¡Pura diversión!
-                </p>
+                <p class="mode-description">Palabras graciosas y frases de memes.</p>
                 <span class="mode-difficulty easy">DIVERTIDO</span>
-            </div>
-
-            <!-- Modo Ciego -->
-            <div class="mode-card" onclick="location.href='blind-mode.html'">
-                <span class="mode-icon">👁️</span>
-                <h2 class="mode-title">Modo Ciego</h2>
-                <p class="mode-description">
-                    La palabra desaparece. Solo tu memoria. Para maestros.
-                </p>
-                <span class="mode-difficulty expert">MAESTRO</span>
             </div>
 
             <!-- Modo Karaoke -->
             <div class="mode-card" onclick="location.href='karaoke-mode.html'">
                 <span class="mode-icon">🎤</span>
                 <h2 class="mode-title">Modo Karaoke</h2>
-                <p class="mode-description">
-                    Escribe la letra al ritmo de la música. ¡Siente el beat!
-                </p>
+                <p class="mode-description">Escribe la letra al ritmo de la música.</p>
                 <span class="mode-difficulty medium">MUSICAL</span>
             </div>
 
@@ -290,29 +260,23 @@
             <div class="mode-card" onclick="location.href='languages-mode.html'">
                 <span class="mode-icon">🌍</span>
                 <h2 class="mode-title">Modo Idiomas</h2>
-                <p class="mode-description">
-                    Aprende inglés, francés, alemán y más mientras juegas.
-                </p>
+                <p class="mode-description">Aprende inglés, francés, alemán y más.</p>
                 <span class="mode-difficulty medium">EDUCATIVO</span>
             </div>
 
-            <!-- Modo Entrenador IA -->
+            <!-- Entrenador IA -->
             <div class="mode-card" onclick="location.href='ai-trainer.html'">
                 <span class="mode-icon">🧠</span>
                 <h2 class="mode-title">Entrenador IA</h2>
-                <p class="mode-description">
-                    Analiza tus errores y genera ejercicios personalizados.
-                </p>
+                <p class="mode-description">Analiza tus errores y genera ejercicios.</p>
                 <span class="mode-difficulty medium">HERRAMIENTA</span>
             </div>
 
-            <!-- Modo Versus IA -->
+            <!-- Versus IA -->
             <div class="mode-card" onclick="location.href='versus-ai.html'">
                 <span class="mode-icon">🤖</span>
                 <h2 class="mode-title">Versus IA</h2>
-                <p class="mode-description">
-                    Compite contra un bot inteligente. 5 niveles de dificultad.
-                </p>
+                <p class="mode-description">Compite contra un bot inteligente.</p>
                 <span class="mode-difficulty hard">COMPETITIVO</span>
             </div>
         </div>
