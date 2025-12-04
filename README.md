@@ -10,6 +10,7 @@
 ---
 
 ## 🌟 Características Principales
+mec.wuaze.com  aqui podran verlo visualmente y juzgarlo
 
 ### 🎯 15 Modos de Juego Únicos
 
