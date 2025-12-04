@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Base de Datos - VELOCITY</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: white;
+            font-family: 'Courier New', monospace;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ff88;
+        }
+
+        h1 {
+            color: #00ff88;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 4px solid #00ff88;
+        }
+
+        button {
+            background: #00ff88;
+            border: none;
+            color: #000;
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .success {
+            color: #00ff88;
+        }
+
+        .error {
+            color: #ff006e;
+        }
+
+        .info {
+            color: #29ADFF;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🧪 Test de Integración de Base de Datos</h1>
+
+        <div class="test-section">
+            <h2>1️⃣ Test de Conexión</h2>
+            <p>Verifica que el módulo database.js esté cargado correctamente.</p>
+            <button onclick="testConnection()">Probar Conexión</button>
+            <div id="connection-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2️⃣ Guardar Puntuación de Prueba</h2>
+            <p>Guarda una puntuación de ejemplo en la base de datos.</p>
+            <button onclick="testSaveScore()">Guardar Puntuación</button>
+            <div id="save-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3️⃣ Ver Tabla de Líderes</h2>
+            <p>Obtiene y muestra las mejores puntuaciones.</p>
+            <button onclick="testLeaderboard()">Ver Líderes</button>
+            <div id="leaderboard-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4️⃣ Estadísticas del Jugador</h2>
+            <p>Muestra las estadísticas del jugador actual.</p>
+            <button onclick="testPlayerStats()">Ver Estadísticas</button>
+            <div id="stats-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5️⃣ Tabla de Líderes Visual</h2>
+            <p>Muestra la tabla de líderes con formato HTML.</p>
+            <button onclick="testVisualLeaderboard()">Mostrar Tabla</button>
+            <div id="visual-leaderboard"></div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script>
+        function testConnection() {
+            const result = document.getElementById('connection-result');
+
+            if (typeof dbAPI !== 'undefined') {
+                result.innerHTML = '<span class="success">✅ ÉXITO: Módulo database.js cargado correctamente</span>\n';
+                result.innerHTML += '<span class="info">Jugador actual: ' + dbAPI.playerName + '</span>';
+            } else {
+                result.innerHTML = '<span class="error">❌ ERROR: Módulo database.js no encontrado</span>\n';
+                result.innerHTML += '<span class="error">Verifica que database.js esté en el mismo directorio</span>';
+            }
+        }
+
+        async function testSaveScore() {
+            const result = document.getElementById('save-result');
+            result.innerHTML = '<span class="info">⏳ Guardando puntuación...</span>';
+
+            try {
+                const response = await dbAPI.saveScore(
+                    'test-mode',      // modo
+                    Math.floor(Math.random() * 1000) + 500,  // score aleatorio
+                    Math.floor(Math.random() * 50) + 50,     // wpm aleatorio
+                    Math.random() * 10 + 90,                  // accuracy 90-100%
+                    Math.floor(Math.random() * 5) + 1        // level 1-5
+                );
+
+                if (response.success) {
+                    result.innerHTML = '<span class="success">✅ ÉXITO: Puntuación guardada</span>\n';
+                    result.innerHTML += '<span class="info">ID de registro: ' + response.id + '</span>';
+                } else {
+                    result.innerHTML = '<span class="error">❌ ERROR: ' + response.error + '</span>\n';
+                    result.innerHTML += '<span class="error">Verifica la configuración de db_config.php</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ ERROR DE RED: ' + error.message + '</span>\n';
+                result.innerHTML += '<span class="error">Verifica que api.php esté en el servidor</span>';
+            }
+        }
+
+        async function testLeaderboard() {
+            const result = document.getElementById('leaderboard-result');
+            result.innerHTML = '<span class="info">⏳ Cargando tabla de líderes...</span>';
+
+            try {
+                const leaderboard = await dbAPI.getLeaderboard('all', 5);
+
+                if (leaderboard && leaderboard.length > 0) {
+                    result.innerHTML = '<span class="success">✅ ÉXITO: ' + leaderboard.length + ' registros encontrados</span>\n\n';
+                    result.innerHTML += JSON.stringify(leaderboard, null, 2);
+                } else {
+                    result.innerHTML = '<span class="info">ℹ️ No hay puntuaciones aún</span>\n';
+                    result.innerHTML += '<span class="info">Prueba guardando una puntuación primero</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ ERROR: ' + error.message + '</span>';
+            }
+        }
+
+        async function testPlayerStats() {
+            const result = document.getElementById('stats-result');
+            result.innerHTML = '<span class="info">⏳ Cargando estadísticas...</span>';
+
+            try {
+                const stats = await dbAPI.getPlayerStats();
+
+                if (stats) {
+                    result.innerHTML = '<span class="success">✅ ÉXITO: Estadísticas cargadas</span>\n\n';
+                    result.innerHTML += JSON.stringify(stats, null, 2);
+                } else {
+                    result.innerHTML = '<span class="info">ℹ️ No hay estadísticas para este jugador</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">❌ ERROR: ' + error.message + '</span>';
+            }
+        }
+
+        async function testVisualLeaderboard() {
+            const container = document.getElementById('visual-leaderboard');
+            container.innerHTML = '<span class="info">⏳ Cargando...</span>';
+
+            try {
+                await dbAPI.displayLeaderboard('visual-leaderboard', 'all', 10);
+            } catch (error) {
+                container.innerHTML = '<span class="error">❌ ERROR: ' + error.message + '</span>';
+            }
+        }
+
+        // Auto-test al cargar
+        window.onload = () => {
+            testConnection();
+        };
+    </script>
+</body>
+
+</html>

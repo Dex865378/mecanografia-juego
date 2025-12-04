@@ -233,11 +233,18 @@
         document.getElementById('username').textContent = savedName;
         document.getElementById('current-avatar').textContent = savedAvatar;
 
-        // Load stats from Progression
-        document.getElementById('level').textContent = Progression.data.level;
-        document.getElementById('xp').textContent = Progression.data.xp;
-        document.getElementById('coins').textContent = Progression.data.coins;
-        document.getElementById('achievements').textContent = Progression.data.achievements.length;
+        // Load stats from ProgressionSystem
+        setTimeout(() => {
+            if (typeof progressionSystem !== 'undefined') {
+                const playerInfo = progressionSystem.getPlayerInfo();
+                document.getElementById('level').textContent = playerInfo.level;
+                document.getElementById('xp').textContent = playerInfo.totalXP;
+                document.getElementById('achievements').textContent = playerInfo.achievements.length;
+                console.log('✅ Profile loaded:', playerInfo);
+            } else {
+                console.warn('⚠️ ProgressionSystem not loaded');
+            }
+        }, 100);
 
         function editName() {
             document.getElementById('name-display').style.display = 'none';

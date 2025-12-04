@@ -151,6 +151,8 @@
     </div>
 
     <script src="words.js"></script>
+    <script src="database.js"></script>
+    <script src="progression.js"></script>
     <script>
         let stats = { score: 0, perfect: 0, total: 0, gameActive: false, viewTime: 500 };
         let currentWord = '';
@@ -261,6 +263,14 @@
                     playTone(800, 0.1);
                     document.body.style.backgroundColor = '#001100';
                     setTimeout(() => document.body.style.backgroundColor = '#000000', 200);
+
+                    // ✅ OTORGAR XP SOLO AL ACERTAR
+                    const xpGained = Math.floor(currentWord.length * 2); // 2 XP por letra
+                    if (typeof progressionSystem !== 'undefined') {
+                        progressionSystem.addXP(xpGained).then(() => {
+                            console.log(`✨ +${xpGained} XP ganado!`);
+                        });
+                    }
                 } else {
                     playTone(200, 0.3);
                     document.body.style.backgroundColor = '#110000';
