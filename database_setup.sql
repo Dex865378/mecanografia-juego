@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `player_progress` (
   `avatar_url` TEXT DEFAULT NULL,
   `current_level` INT NOT NULL DEFAULT 1,
   `total_xp` INT NOT NULL DEFAULT 0,
+  `coins` INT NOT NULL DEFAULT 0,
   `achievements` TEXT,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,

@@ -56,7 +56,6 @@
             position: absolute;
             top: 20px;
             right: 20px;
-            /* Adjusted to not overlap with lives if needed, or put lives elsewhere */
             background: rgba(255, 0, 110, 0.2);
             border: 2px solid #ff006e;
             color: #ff006e;
@@ -218,6 +217,8 @@
         <div class="kb-row" id="row3"></div>
     </div>
 
+    <script src="database.js"></script>
+    <script src="progression.js"></script>
     <script src="words.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -385,6 +386,14 @@
             playSound('explosion');
             state.words = state.words.filter(w => w !== word);
 
+            // --- INTEGRACIÓN DE PROGRESIÓN ---
+            if (typeof progressionSystem !== 'undefined') {
+                const xpGained = word.text.length * 2;
+                progressionSystem.addXP(xpGained);
+                progressionSystem.addCoins(1); // 1 moneda por nave destruida
+            }
+            // -------------------------------
+
             if (state.wordsDestroyed % 100 === 0) {
                 showCheckpoint();
             }
@@ -417,6 +426,13 @@
             state.playing = false;
             document.getElementById('final-score').innerText = state.score;
             document.getElementById('game-over-screen').classList.remove('hidden');
+
+            // --- GUARDAR PUNTUACIÓN ---
+            if (typeof dbAPI !== 'undefined') {
+                dbAPI.saveScore('ship', state.score, 0, 0, 0).then(() => {
+                    console.log('✅ Puntuación guardada');
+                });
+            }
         }
 
         function loop(timestamp) {

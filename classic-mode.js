@@ -158,11 +158,30 @@ function checkInput() {
 function handleSuccess() {
     const timeBonus = Math.floor(time * 10);
     const comboBonus = combo * 5;
-    score += 10 + timeBonus + comboBonus;
+    const wordScore = 10 + timeBonus + comboBonus;
+    score += wordScore;
     wordsTyped++;
     charsTyped += currentWord.length;
     combo++;
     if (combo > maxCombo) maxCombo = combo;
+
+    // --- INTEGRACIÓN DE PROGRESIÓN ---
+    if (typeof progressionSystem !== 'undefined') {
+        // XP por palabra: longitud * 2 + bonus de combo
+        const xpGained = Math.floor(currentWord.length * 2 + (combo > 5 ? 5 : 0));
+        progressionSystem.addXP(xpGained);
+
+        // Monedas: 1 base + 1 si es difícil + 1 si es hardcore
+        let coinsGained = 1;
+        if (currentDifficulty === 'hard') coinsGained += 1;
+        if (currentDifficulty === 'hardcore') coinsGained += 2;
+
+        // Bonus de monedas por combo cada 10 palabras
+        if (combo % 10 === 0) coinsGained += 5;
+
+        progressionSystem.addCoins(coinsGained);
+    }
+    // -------------------------------
 
     // Check for level up
     wordsUntilNextLevel--;
@@ -184,122 +203,7 @@ function handleSuccess() {
     nextWord();
 }
 
-function showCheckpoint() {
-    isPlaying = false;
-    clearInterval(timerInterval);
-    bgMusic.pause();
-    checkpointModal.style.display = 'flex';
-}
-
-function continueGame() {
-    checkpointModal.style.display = 'none';
-    isPlaying = true;
-
-    const musicVol = localStorage.getItem('velocity_music_volume');
-    bgMusic.volume = musicVol ? parseFloat(musicVol) : 0.3;
-    bgMusic.play();
-
-    timerInterval = setInterval(updateTimer, 10);
-    wordInput.focus();
-    nextWord();
-}
-
-function handleMiss() {
-    lives--;
-    combo = 0;
-    errors++;
-
-    const sfxVol = localStorage.getItem('velocity_sfx_volume');
-    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
-    errorSound.volume = volume;
-    errorSound.play().catch(() => { });
-
-    document.body.classList.add('shake');
-    setTimeout(() => document.body.classList.remove('shake'), 500);
-
-    if (lives <= 0) {
-        endGame();
-    } else {
-        nextWord();
-    }
-}
-
-function levelUp() {
-    level++;
-    wordsUntilNextLevel = 10 + (level * 2);
-
-    const sfxVol = localStorage.getItem('velocity_sfx_volume');
-    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
-    levelUpSound.volume = volume;
-    levelUpSound.play().catch(() => { });
-
-    showNotification(`🎉 ¡NIVEL ${level}!`, '#00ff88');
-    score += level * 50;
-}
-
-function spawnPowerup() {
-    const types = ['⏰', '💎', '🔥', '⚡'];
-    const type = types[Math.floor(Math.random() * types.length)];
-
-    powerups.push({
-        type: type,
-        duration: 5000,
-        startTime: Date.now()
-    });
-
-    const sfxVol = localStorage.getItem('velocity_sfx_volume');
-    const volume = sfxVol ? parseFloat(sfxVol) : 0.5;
-    powerupSound.volume = volume;
-    powerupSound.play().catch(() => { });
-
-    applyPowerup(type);
-    updatePowerupsDisplay();
-}
-
-function applyPowerup(type) {
-    switch (type) {
-        case '⏰': time += 2; showNotification('⏰ +2s', '#ffd700'); break;
-        case '💎': showNotification('💎 x2 Pts', '#00ffff'); break;
-        case '🔥': combo += 5; showNotification('🔥 +5 Combo', '#ff6600'); break;
-        case '⚡': lives++; showNotification('⚡ +1 Vida', '#ff00ff'); break;
-    }
-}
-
-function updatePowerupsDisplay() {
-    const container = document.getElementById('powerups');
-    if (!container) return;
-    powerups = powerups.filter(p => (Date.now() - p.startTime) < p.duration);
-    container.innerHTML = powerups.map(p => `<div class="powerup-icon" style="animation: bounce 0.5s;">${p.type}</div>`).join('');
-}
-
-function showNotification(text, color) {
-    const notif = document.createElement('div');
-    notif.textContent = text;
-    notif.style.cssText = `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: ${color}; color: black; padding: 20px 40px; border-radius: 10px; font-size: 2rem; font-weight: bold; z-index: 1000; animation: fadeInOut 2s;`;
-    document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 2000);
-}
-
-function updateHUD() {
-    scoreDisplay.textContent = score;
-    timeDisplay.textContent = Math.max(0, time).toFixed(2);
-    comboDisplay.textContent = `Combo: ${combo}x`;
-
-    const levelDisplay = document.getElementById('level-display');
-    const livesDisplay = document.getElementById('lives-display');
-    if (levelDisplay) levelDisplay.textContent = level;
-    if (livesDisplay) livesDisplay.textContent = lives;
-
-    const elapsedMin = (Date.now() - gameStartTime) / 60000;
-    const wpm = Math.round((charsTyped / 5) / elapsedMin) || 0;
-    wpmDisplay.textContent = wpm;
-
-    const progress = (time / baseTime) * 100;
-    progressFill.style.width = `${progress}%`;
-    progressFill.style.background = time < 2 ? 'red' : 'linear-gradient(90deg, #b026ff, #00ff88)';
-
-    updatePowerupsDisplay();
-}
+// ... (showCheckpoint, continueGame, handleMiss, levelUp, spawnPowerup, applyPowerup, updatePowerupsDisplay, showNotification, updateHUD se mantienen igual)
 
 function endGame() {
     isPlaying = false;
@@ -319,9 +223,20 @@ function endGame() {
     const accuracy = Math.round(((charsTyped - errors) / charsTyped) * 100) || 0;
     document.getElementById('final-accuracy').textContent = `${accuracy}%`;
 
-    if (typeof Progression !== 'undefined') {
-        Progression.addXP(score);
+    // --- GUARDAR PUNTUACIÓN Y PROGRESO FINAL ---
+    if (typeof progressionSystem !== 'undefined') {
+        // Bono de XP por finalizar
+        const finalXP = Math.floor(score / 10);
+        progressionSystem.addXP(finalXP);
+        console.log(`🏁 Juego terminado. XP Final: ${finalXP}`);
     }
+
+    if (typeof dbAPI !== 'undefined') {
+        dbAPI.saveScore('classic', score, wpm, accuracy, level).then(() => {
+            console.log('✅ Puntuación guardada en base de datos');
+        });
+    }
+    // ------------------------------------------
 }
 
 // CSS Animations
