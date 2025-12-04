@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VELOCITY - Perfil de Jugador</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -162,6 +163,47 @@
             width: 300px;
             margin-bottom: 10px;
         }
+
+        /* Social Login Styles */
+        .social-login-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 1px solid #333;
+        }
+
+        .btn-social {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px auto;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .btn-social:hover {
+            transform: scale(1.02);
+        }
+
+        .btn-google {
+            background: white;
+            color: #444;
+        }
+
+        .btn-google img {
+            width: 18px;
+            height: 18px;
+        }
     </style>
 </head>
 
@@ -182,6 +224,35 @@
             </div>
 
             <div class="level-badge">NIVEL <span id="level">1</span></div>
+
+            <!-- Social Login Section -->
+            <div class="social-login-section">
+                <h3 style="color: #aaa; font-size: 0.8rem; margin-bottom: 15px; letter-spacing: 2px;">GUARDAR PROGRESO
+                    EN LA NUBE</h3>
+
+                <div id="login-buttons">
+                    <!-- Google Login Button Container -->
+                    <div id="g_id_onload" data-client_id="TU_CLIENT_ID_DE_GOOGLE_AQUI"
+                        data-callback="handleCredentialResponse" data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                        data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left">
+                    </div>
+                </div>
+
+                <div id="user-info" style="display: none;">
+                    <div
+                        style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                        <img id="user-avatar-small" src=""
+                            style="width: 30px; height: 30px; border-radius: 50%; display: none;">
+                        <p style="color: #00ff88; margin: 0;">✅ Conectado</p>
+                    </div>
+                    <p id="user-email" style="color: #aaa; font-size: 0.8rem; margin-bottom: 15px;"></p>
+                    <button class="btn-sm" onclick="Auth.logout()"
+                        style="background: #ff006e; border: none; color: white; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-family: 'Orbitron', sans-serif;">Cerrar
+                        Sesión</button>
+                </div>
+            </div>
 
             <div class="stats-grid">
                 <div class="stat-item">
@@ -224,7 +295,9 @@
         <button class="btn" onclick="closeAvatarSelector()" style="margin-top: 20px;">CANCELAR</button>
     </div>
 
+    <script src="database.js"></script>
     <script src="progression.js"></script>
+    <script src="auth.js"></script>
     <script>
         // Load data
         const savedName = localStorage.getItem('velocity_username') || 'Jugador 1';
@@ -244,6 +317,11 @@
             } else {
                 console.warn('⚠️ ProgressionSystem not loaded');
             }
+
+            // Check Auth Status
+            if (typeof Auth !== 'undefined') {
+                Auth.checkStatus();
+            }
         }, 100);
 
         function editName() {
@@ -259,6 +337,11 @@
             document.getElementById('username').textContent = newName;
             document.getElementById('name-display').style.display = 'block';
             document.getElementById('name-edit').style.display = 'none';
+
+            // Sync name if logged in
+            if (typeof dbAPI !== 'undefined') {
+                dbAPI.setPlayerName(newName);
+            }
         }
 
         function openAvatarSelector() {
@@ -273,6 +356,13 @@
             localStorage.setItem('velocity_avatar', avatar);
             document.getElementById('current-avatar').textContent = avatar;
             closeAvatarSelector();
+        }
+
+        // Google Auth Callback
+        function handleCredentialResponse(response) {
+            if (typeof Auth !== 'undefined') {
+                Auth.handleGoogleLogin(response);
+            }
         }
     </script>
 </body>

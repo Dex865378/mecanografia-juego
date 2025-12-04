@@ -19,13 +19,19 @@ CREATE TABLE IF NOT EXISTS `scores` (
 -- Tabla para almacenar el progreso del jugador
 CREATE TABLE IF NOT EXISTS `player_progress` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `player_name` VARCHAR(100) NOT NULL UNIQUE,
+  `player_name` VARCHAR(100) NOT NULL,
+  `google_id` VARCHAR(255) UNIQUE DEFAULT NULL,
+  `facebook_id` VARCHAR(255) UNIQUE DEFAULT NULL,
+  `email` VARCHAR(255) DEFAULT NULL,
+  `avatar_url` TEXT DEFAULT NULL,
   `current_level` INT NOT NULL DEFAULT 1,
   `total_xp` INT NOT NULL DEFAULT 0,
   `achievements` TEXT,
   `created_at` DATETIME NOT NULL,
   `updated_at` DATETIME NOT NULL,
-  INDEX `idx_player_name` (`player_name`)
+  INDEX `idx_player_name` (`player_name`),
+  INDEX `idx_google` (`google_id`),
+  INDEX `idx_facebook` (`facebook_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla para almacenar configuraciones del jugador
