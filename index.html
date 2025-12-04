@@ -213,12 +213,12 @@
             if (typeof progressionSystem !== 'undefined') {
                 const playerInfo = progressionSystem.getPlayerInfo();
                 document.getElementById('user-level').textContent = playerInfo.level;
-                // document.getElementById('user-coins').textContent = playerInfo.coins || 0;
+                document.getElementById('user-coins').textContent = playerInfo.coins || 0;
             }
 
             // Check Auth Status for Top Button
             if (typeof Auth !== 'undefined') {
-                const user = Auth.user; // Auth.init() is called in auth.js
+                const user = Auth.user;
                 const loginBtn = document.getElementById('google-login-btn');
                 const loggedInState = document.getElementById('user-logged-in');
                 const topAvatar = document.getElementById('top-avatar');
@@ -227,7 +227,7 @@
                 if (user) {
                     loginBtn.style.display = 'none';
                     loggedInState.style.display = 'flex';
-                    topUsername.textContent = user.name.split(' ')[0]; // First name
+                    topUsername.textContent = user.name.split(' ')[0];
                     topAvatar.src = user.picture;
                 } else {
                     loginBtn.style.display = 'block';
